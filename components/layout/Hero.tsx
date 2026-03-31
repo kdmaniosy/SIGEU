@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Hero() {
   return (
     <section className="bg-gradient-to-br from-red-700 to-red-900 text-white py-24 px-6 text-center">
@@ -12,12 +14,12 @@ export default function Hero() {
           SIGEU te permite gestionar la disponibilidad de espacios del nuevo edificio de la facultad en tiempo real, sin filas ni papeleos.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="/register" className="bg-white text-red-700 font-bold px-8 py-3 rounded-lg hover:bg-red-50 transition-colors text-sm">
+          <Link href="/login" className="bg-white text-red-700 font-bold px-8 py-3 rounded-lg hover:bg-red-50 transition-colors text-sm">
             Comenzar ahora
-          </a>
-          <a href="#how" className="border border-white text-white font-semibold px-8 py-3 rounded-lg hover:bg-red-800 transition-colors text-sm">
+          </Link>
+          <Link href="/#how" className="border border-white text-white font-semibold px-8 py-3 rounded-lg hover:bg-red-800 transition-colors text-sm">
             Ver cómo funciona
-          </a>
+          </Link>
         </div>
       </div>
     </section>

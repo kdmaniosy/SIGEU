@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const reservasActivas = [
   { id: 1, espacio: "Aula 101", fecha: "01/04/2026", hora: "8:00 - 10:00", estado: "Confirmada" },
   { id: 2, espacio: "Laboratorio de Sistemas", fecha: "02/04/2026", hora: "14:00 - 16:00", estado: "Pendiente" },
@@ -43,9 +45,9 @@ export default function DashboardEstudiante() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-bold text-gray-900">Reservas activas</h2>
-          <a href="/reservas" className="text-sm text-red-700 hover:underline font-medium">
+         <Link href="/reservas" className="text-sm text-red-700 hover:underline font-medium">
             + Nueva reserva
-          </a>
+        </Link>
         </div>
         <div className="space-y-3">
           {reservasActivas.map((r) => (

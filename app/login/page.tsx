@@ -1,4 +1,5 @@
 "use client";
+import { Link } from "lucide-react";
 import { useState } from "react";
 
 export default function LoginPage() {
@@ -86,9 +87,9 @@ function FormLogin() {
           ¿Olvidaste tu contraseña?
         </a>
       </div>
-      <button className="w-full bg-red-700 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-red-800 transition-colors">
+      <Link href="/dashboard" className="block w-full bg-red-700 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-red-800 transition-colors text-center">
         Iniciar sesión
-      </button>
+      </Link>
     </div>
   );
 }
@@ -169,9 +170,9 @@ function FormRegistro() {
           className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
         />
       </div>
-      <button className="w-full bg-red-700 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-red-800 transition-colors">
+      <Link href="/dashboard" className="block w-full bg-red-700 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-red-800 transition-colors text-center">
         Crear cuenta
-      </button>
+      </Link>
     </div>
   );
 }

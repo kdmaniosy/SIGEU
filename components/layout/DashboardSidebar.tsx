@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type Rol = "estudiante" | "docente" | "admin";
 
 interface Props {
@@ -9,12 +11,12 @@ export default function DashboardSidebar({ rol, setRol }: Props) {
   return (
     <aside className="w-64 min-h-screen bg-red-700 text-white flex flex-col">
       <div className="p-6 border-b border-red-600">
-        <div className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center">
             <span className="text-red-700 font-bold text-sm">U</span>
           </div>
           <span className="font-bold text-lg">SIGEU</span>
-        </div>
+        </Link>
       </div>
 
       <div className="p-4 border-b border-red-600">
@@ -44,28 +46,29 @@ export default function DashboardSidebar({ rol, setRol }: Props) {
         </p>
         <div className="flex flex-col gap-1">
           {[
-            { icon: "🏠", label: "Inicio" },
-            { icon: "📅", label: "Mis reservas" },
-            { icon: "🔍", label: "Buscar espacios" },
-            { icon: "📊", label: "Estadísticas" },
-            { icon: "⚙️", label: "Configuración" },
+            { icon: "🏠", label: "Inicio", href: "/dashboard" },
+            { icon: "📅", label: "Mis reservas", href: "/dashboard" },
+            { icon: "🔍", label: "Buscar espacios", href: "/reservas" },
+            { icon: "📊", label: "Estadísticas", href: "/dashboard" },
+            { icon: "⚙️", label: "Configuración", href: "/dashboard" },
           ].map((item) => (
-            <button
+            <Link
               key={item.label}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-100 hover:bg-red-600 transition-colors text-left"
+              href={item.href}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-100 hover:bg-red-600 transition-colors"
             >
               <span>{item.icon}</span>
               <span>{item.label}</span>
-            </button>
+            </Link>
           ))}
         </div>
       </nav>
 
       <div className="p-4 border-t border-red-600">
-        <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-100 hover:bg-red-600 transition-colors w-full">
+        <Link href="/login" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-100 hover:bg-red-600 transition-colors w-full">
           <span>🚪</span>
           <span>Cerrar sesión</span>
-        </button>
+        </Link>
       </div>
     </aside>
   );
