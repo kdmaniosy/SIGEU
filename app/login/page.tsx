@@ -1,6 +1,7 @@
 "use client";
-import { Link } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
+
 
 export default function LoginPage() {
   const [tab, setTab] = useState<"login" | "registro">("login");
@@ -88,7 +89,7 @@ function FormLogin() {
         </a>
       </div>
       <Link href="/dashboard" className="block w-full bg-red-700 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-red-800 transition-colors text-center">
-        Iniciar sesión
+          Iniciar sesión
       </Link>
     </div>
   );

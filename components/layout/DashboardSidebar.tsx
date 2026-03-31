@@ -46,7 +46,7 @@ export default function DashboardSidebar({ rol, setRol }: Props) {
         </p>
         <div className="flex flex-col gap-1">
           {[
-            { icon: "🏠", label: "Inicio", href: "/dashboard" },
+            { icon: "🏠", label: "Inicio", href: "/" },
             { icon: "📅", label: "Mis reservas", href: "/dashboard" },
             { icon: "🔍", label: "Buscar espacios", href: "/reservas" },
             { icon: "📊", label: "Estadísticas", href: "/dashboard" },
