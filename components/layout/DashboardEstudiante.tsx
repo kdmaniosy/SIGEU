@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import ModalConfirmacion from "@/components/ui/ModalConfirmacion";
+import Calendario from "@/components/ui/Calendario";
 
 const reservasInicialesActivas = [
   { id: 1, espacio: "Aula 101", fecha: "01/04/2026", hora: "8:00 - 10:00", estado: "Confirmada" },
@@ -141,6 +142,13 @@ export default function DashboardEstudiante() {
             </tbody>
           </table>
         </div>
+      </div>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h2 className="font-bold text-gray-900 mb-5">Mi calendario</h2>
+        <Calendario
+          reservas={[...reservasInicialesActivas, ...historialInicial]}
+          onDiaClick={(fecha) => console.log("Día seleccionado:", fecha)}
+        />
       </div>
     </div>
   );
