@@ -1,76 +1,105 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import ModalConfirmacion from "@/components/ui/ModalConfirmacion";
 import Calendario from "@/components/ui/Calendario";
+import { reservasService } from "@/lib/api";
 
-const reservasInicialesActivas = [
-  { id: 1, espacio: "Aula 305", fecha: "01/04/2026", hora: "7:00 - 9:00", materia: "Programación I", estado: "Confirmada" },
-  { id: 2, espacio: "Laboratorio de Sistemas", fecha: "03/04/2026", hora: "14:00 - 16:00", materia: "Bases de Datos", estado: "Pendiente" },
-  { id: 3, espacio: "Aula 101", fecha: "04/04/2026", hora: "10:00 - 12:00", materia: "Algoritmos", estado: "Confirmada" },
-];
+interface Usuario {
+  code: string;
+  name1: string;
+  usertype_id: string;
+}
 
-const historialInicial = [
-  { id: 4, espacio: "Aula 203", fecha: "25/03/2026", hora: "10:00 - 12:00", materia: "Programación I", estado: "Completada" },
-  { id: 5, espacio: "Laboratorio de Electrónica", fecha: "20/03/2026", hora: "14:00 - 16:00", materia: "Circuitos", estado: "Completada" },
-  { id: 6, espacio: "Aula Magna", fecha: "15/03/2026", hora: "8:00 - 10:00", materia: "Conferencia", estado: "Cancelada" },
-];
+interface Props {
+  usuario: Usuario;
+}
 
-const estadoColor: Record<string, string> = {
-  Confirmada: "bg-green-100 text-green-700",
-  Pendiente: "bg-yellow-100 text-yellow-700",
-  Completada: "bg-blue-100 text-blue-700",
-  Cancelada: "bg-red-100 text-red-700",
+const estadoLabel: Record<string, string> = {
+  P: "Pendiente",
+  A: "Confirmada",
+  C: "Cancelada",
 };
 
-export default function DashboardDocente() {
-  const [reservasActivas, setReservasActivas] = useState(reservasInicialesActivas);
-  const [historial, setHistorial] = useState(historialInicial);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [reservaSeleccionada, setReservaSeleccionada] = useState<number | null>(null);
+const estadoColor: Record<string, string> = {
+  P: "bg-yellow-100 text-yellow-700",
+  A: "bg-green-100 text-green-700",
+  C: "bg-red-100 text-red-700",
+};
 
-  function abrirModal(id: number) {
-    setReservaSeleccionada(id);
+export default function DashboardDocente({ usuario }: Props) {
+  const [reservasActivas, setReservasActivas] = useState<any[]>([]);
+  const [historial, setHistorial] = useState<any[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [reservaSeleccionada, setReservaSeleccionada] = useState<string | null>(null);
+
+  useEffect(() => {
+    cargarReservas();
+  }, []);
+
+  async function cargarReservas() {
+    setCargando(true);
+    try {
+      const data = await reservasService.obtenerTodas({ code: usuario.code });
+      setReservasActivas(data.filter((r: any) => r.detalles?.[0]?.status !== "C"));
+      setHistorial(data.filter((r: any) => r.detalles?.[0]?.status === "C"));
+    } catch {
+      setReservasActivas([]);
+      setHistorial([]);
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  function abrirModal(reservation_number: string) {
+    setReservaSeleccionada(reservation_number);
     setModalVisible(true);
   }
 
-  function confirmarCancelacion() {
-    if (reservaSeleccionada === null) return;
-    const reserva = reservasActivas.find((r) => r.id === reservaSeleccionada);
-    if (reserva) {
-      setReservasActivas(reservasActivas.filter((r) => r.id !== reservaSeleccionada));
-      setHistorial([{ ...reserva, estado: "Cancelada" }, ...historial]);
+  async function confirmarCancelacion() {
+    if (!reservaSeleccionada) return;
+    try {
+      await reservasService.cancelar(reservaSeleccionada, usuario.code);
+      await cargarReservas();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setModalVisible(false);
+      setReservaSeleccionada(null);
     }
-    setModalVisible(false);
-    setReservaSeleccionada(null);
   }
 
-  function cerrarModal() {
-    setModalVisible(false);
-    setReservaSeleccionada(null);
-  }
+  const reservasCalendario = reservasActivas.map((r: any) => ({
+    id: r.reservation_number,
+    espacio: r.detalles?.[0]?.space_id || "Espacio",
+    fecha: r.date,
+    hora: `${r.detalles?.[0]?.start_time || ""} - ${r.detalles?.[0]?.end_time || ""}`,
+    estado: estadoLabel[r.detalles?.[0]?.status || "P"],
+  }));
 
   return (
     <div className="space-y-8">
       <ModalConfirmacion
         visible={modalVisible}
         titulo="¿Cancelar reserva?"
-        mensaje="Esta acción no se puede deshacer. La reserva pasará al historial como cancelada."
+        mensaje="Esta acción no se puede deshacer."
         onConfirmar={confirmarCancelacion}
-        onCancelar={cerrarModal}
+        onCancelar={() => { setModalVisible(false); setReservaSeleccionada(null); }}
       />
 
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Bienvenido, Docente</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Bienvenido, {usuario.name1} 👋
+        </h1>
         <p className="text-gray-500 mt-1">Gestiona los espacios para tus clases y actividades.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: "Clases programadas", valor: reservasActivas.length.toString(), icon: "📅", color: "bg-red-50 text-red-700" },
-          { label: "Horas reservadas", valor: "12", icon: "⏱️", color: "bg-blue-50 text-blue-700" },
-          { label: "Espacios usados", valor: "4", icon: "🏫", color: "bg-green-50 text-green-700" },
-          { label: "Materias activas", valor: "3", icon: "📚", color: "bg-purple-50 text-purple-700" },
+          { label: "Historial", valor: historial.length.toString(), icon: "📚", color: "bg-blue-50 text-blue-700" },
+          { label: "Código docente", valor: usuario.code, icon: "🪪", color: "bg-green-50 text-green-700" },
         ].map((stat) => (
           <div key={stat.label} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg mb-3 ${stat.color}`}>
@@ -89,22 +118,30 @@ export default function DashboardDocente() {
             + Nueva reserva
           </Link>
         </div>
-        {reservasActivas.length === 0 ? (
+        {cargando ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-16 bg-gray-100 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+        ) : reservasActivas.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-6">No tienes clases programadas.</p>
         ) : (
           <div className="space-y-3">
-            {reservasActivas.map((r) => (
-              <div key={r.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            {reservasActivas.map((r: any) => (
+              <div key={r.reservation_number} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <p className="font-medium text-gray-900 text-sm">{r.espacio}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{r.materia} · {r.fecha} · {r.hora}</p>
+                  <p className="font-medium text-gray-900 text-sm">
+                    Reserva #{r.reservation_number}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">{r.date}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${estadoColor[r.estado]}`}>
-                    {r.estado}
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${estadoColor[r.detalles?.[0]?.status || "P"]}`}>
+                    {estadoLabel[r.detalles?.[0]?.status || "P"]}
                   </span>
                   <button
-                    onClick={() => abrirModal(r.id)}
+                    onClick={() => abrirModal(r.reservation_number)}
                     className="text-xs text-red-700 hover:underline"
                   >
                     Cancelar
@@ -117,41 +154,10 @@ export default function DashboardDocente() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <h2 className="font-bold text-gray-900 mb-5">Historial de reservas</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-500 border-b border-gray-100">
-                <th className="pb-3 font-medium">Espacio</th>
-                <th className="pb-3 font-medium">Materia</th>
-                <th className="pb-3 font-medium">Fecha</th>
-                <th className="pb-3 font-medium">Horario</th>
-                <th className="pb-3 font-medium">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {historial.map((r) => (
-                <tr key={r.id}>
-                  <td className="py-3 text-gray-900">{r.espacio}</td>
-                  <td className="py-3 text-gray-500">{r.materia}</td>
-                  <td className="py-3 text-gray-500">{r.fecha}</td>
-                  <td className="py-3 text-gray-500">{r.hora}</td>
-                  <td className="py-3">
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${estadoColor[r.estado]}`}>
-                      {r.estado}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <h2 className="font-bold text-gray-900 mb-5">Mi calendario</h2>
         <Calendario
-          reservas={[...reservasInicialesActivas, ...historialInicial]}
-          onDiaClick={(fecha) => console.log("Día seleccionado:", fecha)}
+          reservas={reservasCalendario}
+          onDiaClick={(fecha) => console.log("Día:", fecha)}
         />
       </div>
     </div>

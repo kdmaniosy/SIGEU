@@ -13,7 +13,15 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: "Error desconocido" }));
-    throw new Error(error.detail || "Error en la solicitud");
+    let msg = "Error en la solicitud";
+    if (typeof error.detail === "string") {
+      msg = error.detail;
+    } else if (Array.isArray(error.detail)) {
+      msg = error.detail.map((err: any) => `${err.loc.join(".")}: ${err.msg}`).join(", ");
+    } else if (error.detail && typeof error.detail === "object") {
+      msg = JSON.stringify(error.detail);
+    }
+    throw new Error(msg);
   }
 
   return res.json();
@@ -81,32 +89,76 @@ export const reservasService = {
   obtenerUna: (reservation_number: string) =>
     fetchAPI(`/reservas/${reservation_number}`),
 
-crear: (datos: {
-  reservation_number: string;
-  date: string;
-  code: string;
-}) =>
-  fetchAPI("/reservas/", {
-    method: "POST",
+  crear: (datos: {
+    reservation_number: string;
+    date: string;
+    code: string;
+  }) =>
+    fetchAPI("/reservas/", {
+      method: "POST",
+      body: JSON.stringify(datos),
+    }),
+
+  actualizar: (
+    reservation_number: string,
+    datos: {
+    date: string;
+    code: string;
+    }
+  ) =>
+  fetchAPI(`/reservas/${reservation_number}`, {
+    method: "PUT",
     body: JSON.stringify(datos),
   }),
 
-agregarDetalle: (
-  reservation_number: string,
-  detalle: {
-    line_number: number;
-    reservation_number: string;
-    space_id: string;
-    building_id: string;
-    start_time: string;
-    end_time: string;
-    status: string;
-  }
-) =>
-  fetchAPI(`/reservas/${reservation_number}/detalles`, {
-    method: "POST",
-    body: JSON.stringify(detalle),
-  }),
+  cancelar: (reservation_number: string, solicitante_code: string) =>
+    fetchAPI(`/reservas/${reservation_number}?solicitante_code=${solicitante_code}`, {
+      method: "DELETE",
+    }),
+
+  agregarDetalle: (
+    reservation_number: string,
+    detalle: {
+      line_number: number;
+      reservation_number: string;
+      space_id: string;
+      building_id: string;
+      start_time: string;
+      end_time: string;
+      status: string;
+    }
+  ) =>
+    fetchAPI(`/reservas/${reservation_number}/detalles`, {
+      method: "POST",
+      body: JSON.stringify(detalle),
+    }),
+
+  actualizarDetalle: (
+    reservation_number: string,
+    line_number: number,
+    detalle: {
+      line_number: number;
+      reservation_number: string;
+      space_id: string;
+      building_id: string;
+      start_time: string;
+      end_time: string;
+      status: string;
+    }
+  ) =>
+    fetchAPI(`/reservas/${reservation_number}/detalles/${line_number}`, {
+      method: "PUT",
+      body: JSON.stringify(detalle),
+    }),
+
+  actualizarEstadoDetalle: (
+    reservation_number: string,
+    line_number: number,
+    status: string
+  ) =>
+    fetchAPI(`/reservas/${reservation_number}/detalles/${line_number}/estado?status=${status}`, {
+      method: "PATCH",
+    }),
 };
 
 // ─── USUARIOS ────────────────────────────────────────────────

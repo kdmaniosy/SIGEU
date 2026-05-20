@@ -72,8 +72,8 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
     reservation_number,
     space_id: espacioSeleccionado.space_id,
     building_id: espacioSeleccionado.building_id,
-    start_time: form.fecha,
-    end_time: form.fecha,
+    start_time: `${form.fecha}T${form.hora_inicio}:00`,
+    end_time: `${form.fecha}T${form.hora_fin}:00`,
     status: "P",
     });
 
