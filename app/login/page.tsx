@@ -1,7 +1,8 @@
 "use client";
-import Link from "next/link";
 import { useState } from "react";
-
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authService } from "@/lib/api";
 
 export default function LoginPage() {
   const [tab, setTab] = useState<"login" | "registro">("login");
@@ -57,6 +58,31 @@ export default function LoginPage() {
 }
 
 function FormLogin() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [error, setError] = useState("");
+  const [cargando, setCargando] = useState(false);
+
+  async function handleLogin() {
+    if (!email || !contrasena) {
+      setError("Por favor completa todos los campos.");
+      return;
+    }
+    setCargando(true);
+    setError("");
+    try {
+      const data = await authService.login(email, contrasena);
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("usuario", JSON.stringify(data.usuario));
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al iniciar sesión");
+    } finally {
+      setCargando(false);
+    }
+  }
+
   return (
     <div className="space-y-5">
       <div>
@@ -66,6 +92,8 @@ function FormLogin() {
         <input
           type="email"
           placeholder="correo@universidad.edu"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
         />
       </div>
@@ -76,9 +104,14 @@ function FormLogin() {
         <input
           type="password"
           placeholder="••••••••"
+          value={contrasena}
+          onChange={(e) => setContrasena(e.target.value)}
           className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
         />
       </div>
+      {error && (
+        <p className="text-red-600 text-sm bg-red-50 px-4 py-2 rounded-lg">{error}</p>
+      )}
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
           <input type="checkbox" className="accent-red-700" />
@@ -88,92 +121,140 @@ function FormLogin() {
           ¿Olvidaste tu contraseña?
         </a>
       </div>
-      <Link href="/dashboard" className="block w-full bg-red-700 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-red-800 transition-colors text-center">
-          Iniciar sesión
-      </Link>
+      <button
+        onClick={handleLogin}
+        disabled={cargando}
+        className="w-full bg-red-700 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-red-800 transition-colors disabled:opacity-60"
+      >
+        {cargando ? "Iniciando sesión..." : "Iniciar sesión"}
+      </button>
     </div>
   );
 }
 
 function FormRegistro() {
+  const router = useRouter();
+  const [form, setForm] = useState({
+    Code: "",
+    name1: "",
+    name2: "",
+    last_name1: "",
+    last_name2: "",
+    Email: "",
+    Cellphone: "",
+    USERTYPE_ID: "",
+    contrasena: "",
+    confirmar: "",
+  });
+  const [error, setError] = useState("");
+  const [cargando, setCargando] = useState(false);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  async function handleRegistro() {
+    if (!form.Code || !form.name1 || !form.last_name1 || !form.Email || !form.contrasena || !form.USERTYPE_ID) {
+      setError("Por favor completa todos los campos obligatorios.");
+      return;
+    }
+    if (form.contrasena !== form.confirmar) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+    setCargando(true);
+    setError("");
+    try {
+      await authService.registro({
+      code: form.Code,
+      name1: form.name1,
+      name2: form.name2 || undefined,
+      last_name1: form.last_name1,
+      last_name2: form.last_name2 || undefined,
+      email: form.Email,
+      cellphone: form.Cellphone || undefined,
+      usertype_id: form.USERTYPE_ID,
+      contrasena: form.contrasena,
+      });
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al registrarse");
+    } finally {
+      setCargando(false);
+    }
+  }
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Nombre
-          </label>
-          <input
-            type="text"
-            placeholder="Tu nombre"
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Primer nombre *</label>
+          <input name="name1" type="text" placeholder="Nombre" value={form.name1} onChange={handleChange}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Apellido
-          </label>
-          <input
-            type="text"
-            placeholder="Tu apellido"
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Segundo nombre</label>
+          <input name="name2" type="text" placeholder="Opcional" value={form.name2} onChange={handleChange}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Primer apellido *</label>
+          <input name="last_name1" type="text" placeholder="Apellido" value={form.last_name1} onChange={handleChange}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Segundo apellido</label>
+          <input name="last_name2" type="text" placeholder="Opcional" value={form.last_name2} onChange={handleChange}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500" />
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Rol
-        </label>
-        <select className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Código estudiantil / docente *</label>
+        <input name="Code" type="text" placeholder="Ej: 20231234" value={form.Code} onChange={handleChange}
+          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Rol *</label>
+        <select name="USERTYPE_ID" value={form.USERTYPE_ID} onChange={handleChange}
+          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500">
           <option value="">Selecciona tu rol</option>
-          <option value="estudiante">Estudiante</option>
-          <option value="docente">Docente</option>
-          <option value="admin">Administrador</option>
+          <option value="ES">Estudiante</option>
+          <option value="DO">Docente</option>
+          <option value="AD">Administrador</option>
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Código estudiantil / docente
-        </label>
-        <input
-          type="text"
-          placeholder="Ej: 20231234"
-          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
+        <label className="block text-sm font-medium text-gray-700 mb-2">Correo institucional *</label>
+        <input name="Email" type="email" placeholder="correo@universidad.edu" value={form.Email} onChange={handleChange}
+          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500" />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Correo institucional
-        </label>
-        <input
-          type="email"
-          placeholder="correo@universidad.edu"
-          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
+        <label className="block text-sm font-medium text-gray-700 mb-2">Celular</label>
+        <input name="Cellphone" type="text" placeholder="Opcional" value={form.Cellphone} onChange={handleChange}
+          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500" />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Contraseña
-        </label>
-        <input
-          type="password"
-          placeholder="••••••••"
-          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
+        <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña *</label>
+        <input name="contrasena" type="password" placeholder="••••••••" value={form.contrasena} onChange={handleChange}
+          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500" />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Confirmar contraseña
-        </label>
-        <input
-          type="password"
-          placeholder="••••••••"
-          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-        />
+        <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar contraseña *</label>
+        <input name="confirmar" type="password" placeholder="••••••••" value={form.confirmar} onChange={handleChange}
+          className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500" />
       </div>
-      <Link href="/dashboard" className="block w-full bg-red-700 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-red-800 transition-colors text-center">
-        Crear cuenta
-      </Link>
+      {error && (
+        <p className="text-red-600 text-sm bg-red-50 px-4 py-2 rounded-lg">{error}</p>
+      )}
+      <button
+        onClick={handleRegistro}
+        disabled={cargando}
+        className="w-full bg-red-700 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-red-800 transition-colors disabled:opacity-60"
+      >
+        {cargando ? "Creando cuenta..." : "Crear cuenta"}
+      </button>
     </div>
   );
 }
