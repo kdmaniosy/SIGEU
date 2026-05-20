@@ -1,109 +1,120 @@
-const espacios = [
-  {
-    id: 1,
-    nombre: "Aula 101",
-    tipo: "Aula",
-    capacidad: 30,
-    piso: 1,
-    disponible: true,
-    equipamiento: ["Proyector", "Aire acondicionado", "Pizarrón"],
-  },
-  {
-    id: 2,
-    nombre: "Aula 203",
-    tipo: "Aula",
-    capacidad: 20,
-    piso: 2,
-    disponible: false,
-    equipamiento: ["Proyector", "Pizarrón"],
-  },
-  {
-    id: 3,
-    nombre: "Laboratorio de Sistemas",
-    tipo: "Laboratorio",
-    capacidad: 25,
-    piso: 3,
-    disponible: true,
-    equipamiento: ["Computadoras", "Proyector", "Aire acondicionado"],
-  },
-  {
-    id: 4,
-    nombre: "Laboratorio de Electrónica",
-    tipo: "Laboratorio",
-    capacidad: 20,
-    piso: 3,
-    disponible: true,
-    equipamiento: ["Equipos electrónicos", "Osciloscopios", "Pizarrón"],
-  },
-  {
-    id: 5,
-    nombre: "Aula Magna",
-    tipo: "Aula",
-    capacidad: 100,
-    piso: 1,
-    disponible: false,
-    equipamiento: ["Proyector", "Sistema de sonido", "Aire acondicionado"],
-  },
-  {
-    id: 6,
-    nombre: "Aula 305",
-    tipo: "Aula",
-    capacidad: 30,
-    piso: 3,
-    disponible: true,
-    equipamiento: ["Proyector", "Pizarrón"],
-  },
-];
+"use client";
+import { useState, useEffect } from "react";
+import { espaciosService } from "@/lib/api";
 
-export default function ReservasLista() {
+interface Espacio {
+  space_id: string;
+  building_id: string;
+  name: string;
+  capacity: number;
+  space_type_id: string;
+  tipo_espacio?: { name: string };
+  edificio?: { name: string };
+}
+
+interface Props {
+  onSeleccionar: (espacio: Espacio) => void;
+  espacioSeleccionado: Espacio | null;
+  filtros: { tipo?: string; capacidad_min?: number };
+}
+
+export default function ReservasLista({ onSeleccionar, espacioSeleccionado, filtros }: Props) {
+  const [espacios, setEspacios] = useState<Espacio[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    cargarEspacios();
+  }, [filtros]);
+
+  async function cargarEspacios() {
+    setCargando(true);
+    setError("");
+    try {
+      const data = await espaciosService.obtenerTodos(filtros);
+      setEspacios(data);
+    } catch {
+      setError("No se pudieron cargar los espacios.");
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  if (cargando) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+            <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+        <p className="text-red-600 text-sm">{error}</p>
+        <button onClick={cargarEspacios} className="mt-3 text-sm text-red-700 hover:underline font-medium">
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  if (espacios.length === 0) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center">
+        <p className="text-gray-500 text-sm">No se encontraron espacios disponibles.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      {espacios.map((espacio) => (
-        <div
-          key={espacio.id}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow"
-        >
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <h3 className="font-semibold text-gray-900">{espacio.nombre}</h3>
-              <span className="text-xs text-gray-500">Piso {espacio.piso}</span>
-            </div>
-            <span
-              className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                espacio.disponible
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {espacio.disponible ? "Disponible" : "Ocupado"}
-            </span>
-          </div>
-          <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-            <span>👥 {espacio.capacidad} personas</span>
-            <span>🏷️ {espacio.tipo}</span>
-          </div>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {espacio.equipamiento.map((item) => (
-              <span
-                key={item}
-                className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-          <button
-            disabled={!espacio.disponible}
-            className={`w-full py-2 rounded-lg text-sm font-semibold transition-colors ${
-              espacio.disponible
-                ? "bg-red-700 text-white hover:bg-red-800"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+      {espacios.map((espacio) => {
+        const seleccionado = espacioSeleccionado?.space_id === espacio.space_id &&
+          espacioSeleccionado?.building_id === espacio.building_id;
+        return (
+          <div
+            key={`${espacio.space_id}-${espacio.building_id}`}
+            className={`bg-white rounded-xl p-5 shadow-sm border transition-all ${
+              seleccionado
+                ? "border-red-500 ring-2 ring-red-200"
+                : "border-gray-100 hover:shadow-md"
             }`}
           >
-            {espacio.disponible ? "Reservar" : "No disponible"}
-          </button>
-        </div>
-      ))}
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h3 className="font-semibold text-gray-900">{espacio.name}</h3>
+                <span className="text-xs text-gray-500">
+                  {espacio.edificio?.name || espacio.building_id}
+                </span>
+              </div>
+              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700">
+                Disponible
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+              <span>👥 {espacio.capacity} personas</span>
+              <span>🏷️ {espacio.tipo_espacio?.name || espacio.space_type_id}</span>
+            </div>
+            <button
+              onClick={() => onSeleccionar(espacio)}
+              className={`w-full py-2 rounded-lg text-sm font-semibold transition-colors ${
+                seleccionado
+                  ? "bg-red-700 text-white"
+                  : "bg-red-700 text-white hover:bg-red-800"
+              }`}
+            >
+              {seleccionado ? "✓ Seleccionado" : "Reservar"}
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }

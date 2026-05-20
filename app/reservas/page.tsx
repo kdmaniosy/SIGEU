@@ -1,9 +1,29 @@
+"use client";
+import { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import ReservasFiltros from "@/components/layout/ReservasFiltros";
 import ReservasLista from "@/components/layout/ReservasLista";
 import ReservasFormulario from "@/components/layout/ReservasFormulario";
 
+interface Espacio {
+  space_id: string;
+  building_id: string;
+  name: string;
+  capacity: number;
+  space_type_id: string;
+  tipo_espacio?: { name: string };
+  edificio?: { name: string };
+}
+
+interface Filtros {
+  tipo?: string;
+  capacidad_min?: number;
+}
+
 export default function ReservasPage() {
+  const [espacioSeleccionado, setEspacioSeleccionado] = useState<Espacio | null>(null);
+  const [filtros, setFiltros] = useState<Filtros>({});
+
   return (
     <main className="min-h-screen bg-gray-50">
       <Navbar />
@@ -14,13 +34,17 @@ export default function ReservasPage() {
             Selecciona el aula o laboratorio que necesitas y elige tu horario.
           </p>
         </div>
-        <ReservasFiltros />
+        <ReservasFiltros onFiltrar={setFiltros} />
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <ReservasLista />
+            <ReservasLista
+              onSeleccionar={setEspacioSeleccionado}
+              espacioSeleccionado={espacioSeleccionado}
+              filtros={filtros}
+            />
           </div>
           <div>
-            <ReservasFormulario />
+            <ReservasFormulario espacioSeleccionado={espacioSeleccionado} />
           </div>
         </div>
       </div>

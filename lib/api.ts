@@ -81,35 +81,32 @@ export const reservasService = {
   obtenerUna: (reservation_number: string) =>
     fetchAPI(`/reservas/${reservation_number}`),
 
-  crear: (datos: {
-    Reservation_number: string;
-    Date: string;
-    Code: string;
-  }) =>
-    fetchAPI("/reservas/", {
-      method: "POST",
-      body: JSON.stringify(datos),
-    }),
+crear: (datos: {
+  reservation_number: string;
+  date: string;
+  code: string;
+}) =>
+  fetchAPI("/reservas/", {
+    method: "POST",
+    body: JSON.stringify(datos),
+  }),
 
-  cancelar: (reservation_number: string) =>
-    fetchAPI(`/reservas/${reservation_number}`, { method: "DELETE" }),
-
-  agregarDetalle: (
-    reservation_number: string,
-    detalle: {
-      Line_number: number;
-      Reservation_number: string;
-      SPACE_ID: string;
-      BUILDING_ID: string;
-      Start_Time: string;
-      End_Time: string;
-      Status: string;
-    }
-  ) =>
-    fetchAPI(`/reservas/${reservation_number}/detalles`, {
-      method: "POST",
-      body: JSON.stringify(detalle),
-    }),
+agregarDetalle: (
+  reservation_number: string,
+  detalle: {
+    line_number: number;
+    reservation_number: string;
+    space_id: string;
+    building_id: string;
+    start_time: string;
+    end_time: string;
+    status: string;
+  }
+) =>
+  fetchAPI(`/reservas/${reservation_number}/detalles`, {
+    method: "POST",
+    body: JSON.stringify(detalle),
+  }),
 };
 
 // ─── USUARIOS ────────────────────────────────────────────────
