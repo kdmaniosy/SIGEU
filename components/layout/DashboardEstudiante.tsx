@@ -53,9 +53,17 @@ export default function DashboardEstudiante({ usuario }: Props) {
   async function cargarReservas() {
     setCargando(true);
     try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reservas/actualizar-estados`, { method: "POST" });
       const data = await reservasService.obtenerTodas({ code: usuario.code });
-      const activas = data.filter((r: any) => r.estado !== "C" && r.status !== "C");
-      const hist = data.filter((r: any) => r.estado === "C" || r.status === "C");
+      console.log("Data completa:", JSON.stringify(data[0], null, 2));
+      const activas = data.filter((r: any) => {
+    const detalle = r.detalles?.[0];
+    return !detalle || detalle.status !== "C";
+    });
+    const hist = data.filter((r: any) => {
+    const detalle = r.detalles?.[0];
+    return detalle?.status === "C";
+      });
       setReservasActivas(activas);
       setHistorial(hist);
     } catch {
@@ -89,13 +97,22 @@ export default function DashboardEstudiante({ usuario }: Props) {
     setReservaSeleccionada(null);
   }
 
-  const reservasCalendario = reservasActivas.map((r: any) => ({
+
+const reservasCalendario = [...reservasActivas, ...historial].map((r: any) => {
+  const fecha = r.date ? r.date.split("T")[0] : "";
+  const [anio, mes, dia] = fecha.split("-");
+  const fechaFormateada = `${dia}/${mes}/${anio}`;
+  const detalle = r.detalles?.[0];
+  return {
     id: r.reservation_number,
-    espacio: r.detalles?.[0]?.space_id || "Espacio",
-    fecha: r.date,
-    hora: `${r.detalles?.[0]?.start_time || ""} - ${r.detalles?.[0]?.end_time || ""}`,
-    estado: estadoLabel[r.detalles?.[0]?.status] || "Pendiente",
-  }));
+    espacio: detalle?.space_id || "Sin espacio",
+    fecha: fechaFormateada,
+    hora: detalle
+      ? `${detalle.start_time?.split("T")[1]?.slice(0, 5) || ""} - ${detalle.end_time?.split("T")[1]?.slice(0, 5) || ""}`
+      : "",
+    estado: estadoLabel[detalle?.status || "P"],
+  };
+});
 
   return (
     <div className="space-y-8">
@@ -151,9 +168,11 @@ export default function DashboardEstudiante({ usuario }: Props) {
               <div key={r.reservation_number} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                   <p className="font-medium text-gray-900 text-sm">
-                    Reserva #{r.reservation_number}
+                    {r.detalles?.[0]?.space_id || "Reserva"} #{r.reservation_number}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">{r.date}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {r.date} · {r.detalles?.[0]?.start_time?.split("T")[1]?.slice(0, 5)} - {r.detalles?.[0]?.end_time?.split("T")[1]?.slice(0, 5)}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-semibold px-3 py-1 rounded-full ${estadoColor[r.detalles?.[0]?.status || "P"]}`}>

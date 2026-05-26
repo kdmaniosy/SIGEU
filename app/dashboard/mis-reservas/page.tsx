@@ -36,20 +36,26 @@ export default function MisReservasPage() {
     setMontado(true);
   }, []);
 
-  useEffect(() => {
-    if (!montado) return;
-    const token = localStorage.getItem("token");
-    const usuarioRaw = localStorage.getItem("usuario");
-    if (!token || !usuarioRaw) { router.push("/login"); return; }
-    const usuario = JSON.parse(usuarioRaw);
+useEffect(() => {
+  if (!montado) return;
+  const token = localStorage.getItem("token");
+  const usuarioRaw = localStorage.getItem("usuario");
+  if (!token || !usuarioRaw) { router.push("/login"); return; }
+  const usuario = JSON.parse(usuarioRaw);
 
-    fetch(`http://localhost:8000/reservas/?code=${usuario.code}`, {
-      headers: { Authorization: `Bearer ${token}` },
+  fetch(`http://localhost:8000/reservas/?code=${usuario.code}`, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+  })
+    .then((r) => { 
+      if (!r.ok) throw new Error(`Error ${r.status}`); 
+      return r.json(); 
     })
-      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
-      .then(setReservas)
-      .catch(() => setError("No se pudieron cargar las reservas."));
-  }, [montado]);
+    .then(setReservas)
+    .catch((e) => setError(`No se pudieron cargar las reservas: ${e.message}`));
+}, [montado]);
 
   async function cancelarReserva(reservation_number: string) {
     const token = localStorage.getItem("token");
