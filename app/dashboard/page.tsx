@@ -65,7 +65,7 @@ export default function DashboardPage() {
         <div className="max-w-6xl mx-auto">
           {rol === "estudiante" && <DashboardEstudiante usuario={usuario} />}
           {rol === "docente" && <DashboardDocente usuario={usuario} />}
-          {rol === "admin" && <DashboardAdmin />}
+          {rol === "admin" && <DashboardAdmin usuario={usuario} />}
         </div>
       </main>
     </div>

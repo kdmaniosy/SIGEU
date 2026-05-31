@@ -173,3 +173,12 @@ export const usuariosService = {
 
   obtenerTipos: () => fetchAPI("/usuarios/tipos/all"),
 };
+
+
+// ─── AFORO ────────────────────────────────────────────
+export const aforoService = {
+  obtenerActual: (space_id: string, building_id: string) =>
+    fetchAPI(`/aforo/${space_id}/${building_id}`),
+
+  obtenerTodos: () => fetchAPI("/aforo/"),
+};

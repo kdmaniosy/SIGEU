@@ -222,7 +222,6 @@ function FormRegistro() {
           <option value="">Selecciona tu rol</option>
           <option value="ES">Estudiante</option>
           <option value="DO">Docente</option>
-          <option value="AD">Administrador</option>
         </select>
       </div>
       <div>

@@ -1,6 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { reservasService, usuariosService } from "@/lib/api";
+import { reservasService, usuariosService, espaciosService } from "@/lib/api";
+import AforoWidget from "@/components/ui/AforoWidget";
+import RegistrarAdmin from "@/components/ui/RegistrarAdmin";
+
+interface Props {
+  usuario: { code: string; name1: string; usertype_id: string };
+}
+
 
 const estadoLabel: Record<string, string> = {
   P: "Pendiente",
@@ -14,31 +21,37 @@ const estadoColor: Record<string, string> = {
   C: "bg-red-100 text-red-700",
 };
 
-export default function DashboardAdmin() {
+export default function DashboardAdmin({ usuario }: Props) {
   const [reservas, setReservas] = useState<any[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [espacios, setEspacios] = useState<any[]>([]);
+  const [paginaUsuarios, setPaginaUsuarios] = useState(0);
+  const USUARIOS_POR_PAGINA = 10;
 
   useEffect(() => {
     cargarDatos();
   }, []);
 
-  async function cargarDatos() {
-    setCargando(true);
-    try {
-      const [r, u] = await Promise.all([
-        reservasService.obtenerTodas(),
-        usuariosService.obtenerTodos(),
-      ]);
-      setReservas(r);
-      setUsuarios(u);
-    } catch {
-      setReservas([]);
-      setUsuarios([]);
-    } finally {
-      setCargando(false);
-    }
+async function cargarDatos() {
+  setCargando(true);
+  try {
+    const [r, u, e] = await Promise.allSettled([
+      reservasService.obtenerTodas(),
+      usuariosService.obtenerTodos(),
+      espaciosService.obtenerTodos(),
+    ]);
+    setReservas(r.status === "fulfilled" ? r.value : []);
+    setUsuarios(u.status === "fulfilled" ? u.value : []);
+    setEspacios(e.status === "fulfilled" ? e.value : []);
+  } catch {
+    setReservas([]);
+    setUsuarios([]);
+    setEspacios([]);
+  } finally {
+    setCargando(false);
   }
+}
 
   async function handleCancelar(reservation_number: string) {
     if (!confirm("¿Cancelar esta reserva?")) return;
@@ -131,34 +144,67 @@ export default function DashboardAdmin() {
             </div>
           )}
         </div>
-
+        
+       
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <h2 className="font-bold text-gray-900 mb-5">Usuarios registrados</h2>
           {cargando ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse"></div>
-              ))}
-            </div>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
           ) : usuarios.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">No hay usuarios registrados.</p>
+          <p className="text-sm text-gray-400 text-center py-4">No hay usuarios registrados.</p>
           ) : (
-            <div className="space-y-3">
-              {usuarios.map((u: any) => (
-                <div key={u.code} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{u.name1} {u.last_name1}</p>
-                    <p className="text-xs text-gray-400">{u.code}</p>
-                  </div>
-                  <span className="text-xs font-semibold px-2 py-1 rounded-full bg-red-100 text-red-700">
-                    {rolLabel[u.usertype_id] || u.usertype_id}
-                  </span>
+          <>
+          <div className="space-y-3">
+          {usuarios
+            .slice(paginaUsuarios * USUARIOS_POR_PAGINA, (paginaUsuarios + 1) * USUARIOS_POR_PAGINA)
+            .map((u: any) => (
+              <div key={u.code} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{u.name1} {u.last_name1}</p>
+                  <p className="text-xs text-gray-400">{u.code} · {u.email}</p>
                 </div>
-              ))}
-            </div>
-          )}
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  u.usertype_id === "AD" ? "bg-purple-100 text-purple-700" :
+                  u.usertype_id === "DO" ? "bg-green-100 text-green-700" :
+                  "bg-red-100 text-red-700"
+                  }`}>
+                  {rolLabel[u.usertype_id] || u.usertype_id}
+                </span>
+              </div>
+            ))}
+          </div>
+
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+        <p className="text-xs text-gray-500">
+          {paginaUsuarios * USUARIOS_POR_PAGINA + 1}–{Math.min((paginaUsuarios + 1) * USUARIOS_POR_PAGINA, usuarios.length)} de {usuarios.length} usuarios
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setPaginaUsuarios(p => Math.max(0, p - 1))}
+            disabled={paginaUsuarios === 0}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            ← Anterior
+          </button>
+          <button
+            onClick={() => setPaginaUsuarios(p => Math.min(Math.ceil(usuarios.length / USUARIOS_POR_PAGINA) - 1, p + 1))}
+            disabled={(paginaUsuarios + 1) * USUARIOS_POR_PAGINA >= usuarios.length}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Siguiente →
+          </button>
         </div>
       </div>
+    </>
+  )}
+</div>
+      </div>
+      {espacios.length > 0 && <AforoWidget espacios={espacios} />}
+      <RegistrarAdmin adminCode={usuario?.code || ""} />
     </div>
   );
 }
