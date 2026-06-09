@@ -37,7 +37,7 @@ export default function DashboardSidebar({ rol, usuario }: Props) {
     { icon: "🔍", label: "Reservar espacios", href: "/reservas" },
     { icon: "📊", label: "Estadísticas",      href: "/dashboard/estadisticas" },
     ...(rol === "admin"
-      ? [{ icon: "👥", label: "Usuarios", href: "/dashboard/usuarios" }]
+      ? [{ icon: "👥", label: "Usuarios", href: "/usuarios" }]
       : []),
     { icon: "⚙️", label: "Configuración",    href: "/dashboard/configuracion" },
   ];

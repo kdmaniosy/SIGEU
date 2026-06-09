@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@/lib/ThemeContext";
 
 interface Usuario {
   code: string;
@@ -20,6 +21,7 @@ export default function Navbar() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [menuAbierto, setMenuAbierto] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     const data = localStorage.getItem("usuario");
@@ -65,6 +67,16 @@ export default function Navbar() {
         <Link href="/#how" className="hover:text-red-200 transition-colors">Cómo funciona</Link>
         <Link href="/#contact" className="hover:text-red-200 transition-colors">Contacto</Link>
       </div>
+      
+    <div className="flex items-center gap-2">
+      <button
+        onClick={toggleTheme}
+        aria-label={isDark ? "Activar modo claro" : "Activar modo oscuro"}
+        className="w-9 h-9 rounded-lg bg-red-600 hover:bg-red-500 transition-colors flex items-center justify-center text-lg"
+        >
+        {isDark ? "☀️" : "🌙"}
+      </button>
+
 
       {usuario ? (
         <div className="relative" ref={menuRef}>
@@ -130,6 +142,7 @@ export default function Navbar() {
           Iniciar sesión
         </Link>
       )}
+      </div>
     </nav>
   );
 }
