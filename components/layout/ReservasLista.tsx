@@ -42,7 +42,11 @@ export default function ReservasLista({ onSeleccionar, espacioSeleccionado, filt
 
   if (cargando) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div
+        role="status"
+        aria-label="Cargando espacios disponibles"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+      >
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 animate-pulse">
             <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
@@ -56,9 +60,17 @@ export default function ReservasLista({ onSeleccionar, espacioSeleccionado, filt
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+      <div
+        role="alert"
+        aria-live="assertive"
+        className="bg-red-50 border border-red-200 rounded-xl p-6 text-center"
+      >
         <p className="text-red-600 text-sm">{error}</p>
-        <button onClick={cargarEspacios} className="mt-3 text-sm text-red-700 hover:underline font-medium">
+        <button
+          onClick={cargarEspacios}
+          aria-label="Reintentar cargar espacios"
+          className="mt-3 text-sm text-red-700 hover:underline font-medium"
+        >
           Reintentar
         </button>
       </div>
@@ -67,20 +79,30 @@ export default function ReservasLista({ onSeleccionar, espacioSeleccionado, filt
 
   if (espacios.length === 0) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center">
+      <div
+        role="status"
+        aria-live="polite"
+        className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center"
+      >
         <p className="text-gray-500 text-sm">No se encontraron espacios disponibles.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div
+      role="list"
+      aria-label={`${espacios.length} espacios disponibles`}
+      className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+    >
       {espacios.map((espacio) => {
         const seleccionado = espacioSeleccionado?.space_id === espacio.space_id &&
           espacioSeleccionado?.building_id === espacio.building_id;
         return (
           <div
             key={`${espacio.space_id}-${espacio.building_id}`}
+            role="listitem"
+            aria-label={`${espacio.name}, capacidad ${espacio.capacity} personas, ${espacio.tipo_espacio?.name || espacio.space_type_id}`}
             className={`bg-white rounded-xl p-5 shadow-sm border transition-all ${
               seleccionado
                 ? "border-red-500 ring-2 ring-red-200"
@@ -94,16 +116,28 @@ export default function ReservasLista({ onSeleccionar, espacioSeleccionado, filt
                   {espacio.edificio?.name || espacio.building_id}
                 </span>
               </div>
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700">
+              <span
+                role="status"
+                aria-label="Espacio disponible"
+                className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700"
+              >
                 Disponible
               </span>
             </div>
             <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-              <span>👥 {espacio.capacity} personas</span>
-              <span>🏷️ {espacio.tipo_espacio?.name || espacio.space_type_id}</span>
+              <span aria-label={`Capacidad: ${espacio.capacity} personas`}>
+                👥 {espacio.capacity} personas
+              </span>
+              <span aria-label={`Tipo: ${espacio.tipo_espacio?.name || espacio.space_type_id}`}>
+                🏷️ {espacio.tipo_espacio?.name || espacio.space_type_id}
+              </span>
             </div>
             <button
               onClick={() => onSeleccionar(espacio)}
+              aria-pressed={seleccionado}
+              aria-label={seleccionado
+                ? `${espacio.name} seleccionado, haz clic para deseleccionar`
+                : `Seleccionar ${espacio.name} para reservar`}
               className={`w-full py-2 rounded-lg text-sm font-semibold transition-colors ${
                 seleccionado
                   ? "bg-red-700 text-white"

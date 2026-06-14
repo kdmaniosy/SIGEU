@@ -84,7 +84,7 @@ function FormLogin() {
   }
 
   return (
-    <div className="space-y-5">
+    <div role="form" aria-label="Formulario de inicio de sesión" className="space-y-5">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Correo institucional
@@ -94,6 +94,8 @@ function FormLogin() {
           placeholder="correo@universidad.edu"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          aria-label="Correo institucional"
+          aria-required="true"
           className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
         />
       </div>
@@ -106,11 +108,13 @@ function FormLogin() {
           placeholder="••••••••"
           value={contrasena}
           onChange={(e) => setContrasena(e.target.value)}
+          aria-label="Contraseña"
+          aria-required="true"
           className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
         />
       </div>
       {error && (
-        <p className="text-red-600 text-sm bg-red-50 px-4 py-2 rounded-lg">{error}</p>
+        <p role="alert" aria-live="polite" className="text-red-600 text-sm bg-red-50 px-4 py-2 rounded-lg">{error}</p>
       )}
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
@@ -185,7 +189,7 @@ function FormRegistro() {
   }
 
   return (
-    <div className="space-y-4">
+    <div role="form" aria-label="Formulario de registro" className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Primer nombre *</label>

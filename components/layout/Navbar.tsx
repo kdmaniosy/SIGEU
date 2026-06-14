@@ -54,7 +54,9 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="w-full bg-red-700 text-white px-6 py-4 flex items-center justify-between shadow-md">
+    <nav role="navigation" 
+    aria-label="Navegación principal" 
+    className="w-full bg-red-700 text-white px-6 py-4 flex items-center justify-between shadow-md">
       <Link href="/" className="flex items-center gap-3">
         <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center">
           <span className="text-red-700 font-bold text-sm">U</span>
@@ -62,7 +64,7 @@ export default function Navbar() {
         <span className="font-bold text-lg tracking-wide">SIGEU</span>
       </Link>
 
-      <div className="hidden md:flex gap-8 text-sm font-medium">
+      <div role="menubar" aria-label="Menú principal" className="hidden md:flex gap-8 text-sm font-medium">
         <Link href="/#features" className="hover:text-red-200 transition-colors">Características</Link>
         <Link href="/#how" className="hover:text-red-200 transition-colors">Cómo funciona</Link>
         <Link href="/#contact" className="hover:text-red-200 transition-colors">Contacto</Link>
@@ -82,6 +84,9 @@ export default function Navbar() {
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setMenuAbierto(!menuAbierto)}
+            aria-haspopup="true"
+            aria-expanded={menuAbierto}
+            aria-label={`Menú de usuario: ${usuario.name1}`}
             className="flex items-center gap-2 bg-red-600 hover:bg-red-500 transition-colors px-3 py-2 rounded-lg"
           >
             <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
@@ -99,7 +104,9 @@ export default function Navbar() {
           </button>
 
           {menuAbierto && (
-            <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden">
+            <div role="menu" 
+              aria-label="Opciones de usuario" 
+              className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100">
                 <p className="text-sm font-semibold text-gray-900">{usuario.name1}</p>
                 <p className="text-xs text-gray-500">{usuario.code}</p>

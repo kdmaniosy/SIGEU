@@ -24,7 +24,7 @@ export default function ReservasFiltros({ onFiltrar }: Props) {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-      <form onSubmit={handleBuscar}>
+      <form onSubmit={handleBuscar} role="search" aria-label="Filtros de búsqueda de espacios">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-2">

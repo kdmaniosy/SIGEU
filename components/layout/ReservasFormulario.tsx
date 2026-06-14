@@ -90,12 +90,12 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-6">
       <h2 className="text-lg font-bold text-gray-900 mb-6">Confirmar reserva</h2>
 
-      <div className="space-y-4">
+      <div role="form" aria-label="Formulario de confirmación de reserva" className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Espacio seleccionado
           </label>
-          <div className={`w-full border rounded-lg px-4 py-2 text-sm ${
+          <div aria-live="polite" aria-label={espacioSeleccionado ? `Espacio seleccionado: ${espacioSeleccionado.name}` : "Ningún espacio seleccionado"} className={`w-full border rounded-lg px-4 py-2 text-sm ${
             espacioSeleccionado
               ? "border-red-300 bg-red-50 text-red-700 font-medium"
               : "border-gray-200 bg-gray-50 text-gray-400"
@@ -126,6 +126,8 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
             name="fecha"
             value={form.fecha}
             onChange={handleChange}
+            aria-label="Fecha de la reserva"
+            aria-required="true"
             min={new Date().toISOString().split("T")[0]}
             className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
           />
@@ -141,6 +143,8 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
               name="hora_inicio"
               value={form.hora_inicio}
               onChange={handleChange}
+               aria-label="Hora de inicio"
+              aria-required="true"
               className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
@@ -153,6 +157,8 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
               name="hora_fin"
               value={form.hora_fin}
               onChange={handleChange}
+              aria-label="Hora de fin"
+              aria-required="true"
               className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
@@ -167,17 +173,19 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
             rows={3}
             value={form.motivo}
             onChange={handleChange}
+            aria-label="Motivo de la reserva"
+            aria-required="true"
             placeholder="Ej: Clase de programación, práctica de laboratorio..."
             className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
           />
         </div>
 
         {error && (
-          <p className="text-red-600 text-sm bg-red-50 px-4 py-2 rounded-lg">{error}</p>
+          <p role="alert" aria-live="assertive" className="text-red-600 text-sm bg-red-50 px-4 py-2 rounded-lg">{error}</p>
         )}
 
         {exito && (
-          <p className="text-green-600 text-sm bg-green-50 px-4 py-2 rounded-lg font-medium">
+          <p role="status" aria-live="polite" className="text-green-600 text-sm bg-green-50 px-4 py-2 rounded-lg font-medium">
             ✅ ¡Reserva creada exitosamente!
           </p>
         )}
@@ -185,6 +193,9 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
         <button
           onClick={handleReservar}
           disabled={cargando || !espacioSeleccionado}
+          aria-label={!espacioSeleccionado ? "Selecciona un espacio para confirmar la reserva" : "Confirmar reserva"}
+          aria-busy={cargando}
+          aria-disabled={cargando || !espacioSeleccionado}
           className="w-full bg-red-700 text-white py-3 rounded-lg text-sm font-bold hover:bg-red-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {cargando ? "Creando reserva..." : "Confirmar reserva"}
