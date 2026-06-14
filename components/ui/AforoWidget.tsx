@@ -32,34 +32,53 @@ export default function AforoWidget({ espacios }: Props) {
 
   const cargarAforo = useCallback(async () => {
     if (espacios.length === 0) return;
-    const datos: Record<string, AforoData> = {};
-    await Promise.all(
-      espacios.map(async (e) => {
-        try {
-          const data = await aforoService.obtenerActual(e.space_id, e.building_id);
-          datos[`${e.space_id}-${e.building_id}`] = data;
+    try {
+      const resultados = await aforoService.obtenerTodosActual();
+      const datos: Record<string, AforoData> = {};
 
-          const porcentaje = (data.personas_detectadas / e.capacity) * 100;
-          const alertaKey = `${e.space_id}-${e.building_id}-${Math.floor(porcentaje / 10)}`;
+      espacios.forEach((e) => {
+        datos[`${e.space_id}-${e.building_id}`] = {
+          space_id: e.space_id,
+          building_id: e.building_id,
+          personas_detectadas: 0,
+        };
+      });
 
-          if (porcentaje >= 100 && !alertasEnviadas.current.has(`full-${alertaKey}`)) {
-            agregar(`🚨 ${e.name} superó su capacidad máxima (${data.personas_detectadas}/${e.capacity} personas)`, "error");
-            alertasEnviadas.current.add(`full-${alertaKey}`);
-          } else if (porcentaje >= 80 && !alertasEnviadas.current.has(`warn-${alertaKey}`)) {
-            agregar(`⚠️ ${e.name} está al ${Math.round(porcentaje)}% de su capacidad`, "warning");
-            alertasEnviadas.current.add(`warn-${alertaKey}`);
-          }
-        } catch {
-          datos[`${e.space_id}-${e.building_id}`] = {
-            space_id: e.space_id,
-            building_id: e.building_id,
-            personas_detectadas: 0,
-          };
+      resultados.forEach((r: AforoData) => {
+        const key = `${r.space_id}-${r.building_id}`;
+        datos[key] = r;
+
+        const espacio = espacios.find(
+          (e) => e.space_id === r.space_id && e.building_id === r.building_id
+        );
+        if (!espacio) return;
+
+        const porcentaje = (r.personas_detectadas / espacio.capacity) * 100;
+        const alertaKey = `${r.space_id}-${r.building_id}-${Math.floor(porcentaje / 10)}`;
+
+        if (porcentaje >= 100 && !alertasEnviadas.current.has(`full-${alertaKey}`)) {
+          agregar(`🚨 ${espacio.name} superó su capacidad máxima (${r.personas_detectadas}/${espacio.capacity} personas)`, "error");
+          alertasEnviadas.current.add(`full-${alertaKey}`);
+        } else if (porcentaje >= 80 && !alertasEnviadas.current.has(`warn-${alertaKey}`)) {
+          agregar(`⚠️ ${espacio.name} está al ${Math.round(porcentaje)}% de su capacidad`, "warning");
+          alertasEnviadas.current.add(`warn-${alertaKey}`);
         }
-      })
-    );
-    setAforoData(datos);
-    setCargando(false);
+      });
+
+      setAforoData(datos);
+    } catch {
+      const datos: Record<string, AforoData> = {};
+      espacios.forEach((e) => {
+        datos[`${e.space_id}-${e.building_id}`] = {
+          space_id: e.space_id,
+          building_id: e.building_id,
+          personas_detectadas: 0,
+        };
+      });
+      setAforoData(datos);
+    } finally {
+      setCargando(false);
+    }
   }, [espacios, agregar]);
 
   useEffect(() => {
@@ -90,7 +109,6 @@ export default function AforoWidget({ espacios }: Props) {
           </span>
         </div>
 
-        {/* Video stream */}
         {espacioStream && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">

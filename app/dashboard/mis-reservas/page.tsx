@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import ModalConfirmacion from "@/components/ui/ModalConfirmacion";
 
 interface Detalle {
   line_number: number;
@@ -31,40 +32,56 @@ export default function MisReservasPage() {
   const [error, setError] = useState("");
   const [cancelando, setCancelando] = useState<string | null>(null);
   const [montado, setMontado] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [reservaSeleccionada, setReservaSeleccionada] = useState<string | null>(null);
 
   useEffect(() => {
     setMontado(true);
   }, []);
 
-useEffect(() => {
-  if (!montado) return;
-  const token = localStorage.getItem("token");
-  const usuarioRaw = localStorage.getItem("usuario");
-  if (!token || !usuarioRaw) { router.push("/login"); return; }
-  const usuario = JSON.parse(usuarioRaw);
-
-  fetch(`http://localhost:8000/reservas/?code=${usuario.code}`, {
-    headers: { 
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-  })
-    .then((r) => { 
-      if (!r.ok) throw new Error(`Error ${r.status}`); 
-      return r.json(); 
-    })
-    .then(setReservas)
-    .catch((e) => setError(`No se pudieron cargar las reservas: ${e.message}`));
-}, [montado]);
-
-  async function cancelarReserva(reservation_number: string) {
+  useEffect(() => {
+    if (!montado) return;
     const token = localStorage.getItem("token");
-    setCancelando(reservation_number);
+    const usuarioRaw = localStorage.getItem("usuario");
+    if (!token || !usuarioRaw) { router.push("/login"); return; }
+    const usuario = JSON.parse(usuarioRaw);
+
+    fetch(`http://localhost:8000/reservas/?code=${usuario.code}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error(`Error ${r.status}`);
+        return r.json();
+      })
+      .then(setReservas)
+      .catch((e) => setError(`No se pudieron cargar las reservas: ${e.message}`));
+  }, [montado]);
+
+  function abrirModal(reservation_number: string) {
+    setReservaSeleccionada(reservation_number);
+    setModalVisible(true);
+  }
+
+  function cerrarModal() {
+    setModalVisible(false);
+    setReservaSeleccionada(null);
+  }
+
+  async function confirmarCancelacion() {
+    if (!reservaSeleccionada) return;
+    const usuarioRaw = localStorage.getItem("usuario");
+    if (!usuarioRaw) return;
+    const usuario = JSON.parse(usuarioRaw);
+
+    setCancelando(reservaSeleccionada);
     try {
-      const res = await fetch(`http://localhost:8000/reservas/${reservation_number}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `http://localhost:8000/reservas/${reservaSeleccionada}?solicitante_code=${usuario.code}`,
+        { method: "DELETE" }
+      );
       if (!res.ok) {
         const data = await res.json();
         alert(data.detail || "Error al cancelar");
@@ -72,15 +89,16 @@ useEffect(() => {
       }
       setReservas((prev) =>
         prev.map((r) =>
-          r.reservation_number === reservation_number
+          r.reservation_number === reservaSeleccionada
             ? { ...r, detalles: r.detalles.map((d) => ({ ...d, status: "C" })) }
             : r
         )
       );
     } catch {
-      alert("Error de conexion.");
+      alert("Error de conexión.");
     } finally {
       setCancelando(null);
+      cerrarModal();
     }
   }
 
@@ -90,6 +108,14 @@ useEffect(() => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      <ModalConfirmacion
+        visible={modalVisible}
+        titulo="¿Cancelar reserva?"
+        mensaje="Esta acción no se puede deshacer. La reserva pasará al historial como cancelada."
+        onConfirmar={confirmarCancelacion}
+        onCancelar={cerrarModal}
+      />
+
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Mis reservas</h1>
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
@@ -116,7 +142,7 @@ useEffect(() => {
                 </div>
                 {tieneActivos(r) && (
                   <button
-                    onClick={() => cancelarReserva(r.reservation_number)}
+                    onClick={() => abrirModal(r.reservation_number)}
                     disabled={cancelando === r.reservation_number}
                     className="px-4 py-2 bg-red-700 text-white text-sm rounded-lg hover:bg-red-800 transition disabled:opacity-50"
                   >

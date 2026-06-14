@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { reservasService, usuariosService, espaciosService } from "@/lib/api";
 import AforoWidget from "@/components/ui/AforoWidget";
 import RegistrarAdmin from "@/components/ui/RegistrarAdmin";
+import ModalConfirmacion from "@/components/ui/ModalConfirmacion";
 
 interface Props {
   usuario: { code: string; name1: string; usertype_id: string };
@@ -26,8 +27,10 @@ export default function DashboardAdmin({ usuario }: Props) {
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
   const [espacios, setEspacios] = useState<any[]>([]);
-  const [paginaUsuarios, setPaginaUsuarios] = useState(0);
-  const USUARIOS_POR_PAGINA = 10;
+  const [paginaReservas, setPaginaReservas] = useState(0);
+  const RESERVAS_POR_PAGINA = 8;
+  const [modalVisible, setModalVisible] = useState(false);
+  const [reservaSeleccionada, setReservaSeleccionada] = useState<string | null>(null);
 
   useEffect(() => {
     cargarDatos();
@@ -53,21 +56,41 @@ async function cargarDatos() {
   }
 }
 
-  async function handleCancelar(reservation_number: string) {
-    if (!confirm("¿Cancelar esta reserva?")) return;
-    try {
-      await reservasService.cancelar(reservation_number, "");
-      await cargarDatos();
-    } catch (err) {
-      console.error(err);
-    }
+function abrirModal(reservation_number: string) {
+  setReservaSeleccionada(reservation_number);
+  setModalVisible(true);
+}
+
+function cerrarModal() {
+  setModalVisible(false);
+  setReservaSeleccionada(null);
+}
+
+async function confirmarCancelacion() {
+  if (!reservaSeleccionada) return;
+  try {
+    await reservasService.cancelar(reservaSeleccionada, usuario.code);
+    await cargarDatos();
+  } catch (err: unknown) {
+    const mensaje = err instanceof Error ? err.message : "Error al cancelar la reserva";
+    alert(mensaje);
+  } finally {
+    cerrarModal();
   }
+}
 
   const reservasActivas = reservas.filter((r: any) => r.detalles?.[0]?.status !== "C");
   const rolLabel: Record<string, string> = { ES: "Estudiante", DO: "Docente", AD: "Admin" };
 
   return (
     <div className="space-y-8">
+      <ModalConfirmacion
+      visible={modalVisible}
+      titulo="¿Cancelar reserva?"
+      mensaje="Esta acción no se puede deshacer. La reserva pasará al historial como cancelada."
+      onConfirmar={confirmarCancelacion}
+      onCancelar={cerrarModal}
+      />
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Panel de Administración</h1>
         <p className="text-gray-500 mt-1">Gestiona todos los espacios y reservas del edificio.</p>
@@ -114,7 +137,7 @@ async function cargarDatos() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {reservas.map((r: any) => (
+                  {reservas.slice(paginaReservas * RESERVAS_POR_PAGINA, (paginaReservas + 1) * RESERVAS_POR_PAGINA).map((r: any) => (
                     <tr key={r.reservation_number}>
                       <td className="py-3 text-gray-900 font-medium">#{r.reservation_number}</td>
                       <td className="py-3 text-gray-500">
@@ -130,7 +153,7 @@ async function cargarDatos() {
                       <td className="py-3">
                         {r.detalles?.[0]?.status !== "C" && (
                           <button
-                            onClick={() => handleCancelar(r.reservation_number)}
+                            onClick={() => abrirModal(r.reservation_number)}
                             className="text-xs text-red-700 hover:underline"
                           >
                             Cancelar
@@ -141,6 +164,29 @@ async function cargarDatos() {
                   ))}
                 </tbody>
               </table>
+              {reservas.length > RESERVAS_POR_PAGINA && (
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                  <p className="text-xs text-gray-500">
+                    {paginaReservas * RESERVAS_POR_PAGINA + 1}–{Math.min((paginaReservas + 1) * RESERVAS_POR_PAGINA, reservas.length)} de {reservas.length} reservas
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setPaginaReservas(p => Math.max(0, p - 1))}
+                      disabled={paginaReservas === 0}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      ← Anterior
+                    </button>
+                    <button
+                      onClick={() => setPaginaReservas(p => Math.min(Math.ceil(reservas.length / RESERVAS_POR_PAGINA) - 1, p + 1))}
+                      disabled={(paginaReservas + 1) * RESERVAS_POR_PAGINA >= reservas.length}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Siguiente →
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
