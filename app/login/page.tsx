@@ -121,7 +121,7 @@ function FormLogin() {
           <input type="checkbox" className="accent-red-700" />
           Recordarme
         </label>
-        <a href="#" className="text-sm text-red-700 hover:underline">
+        <a href="/recuperar-password" className="text-sm text-red-700 hover:underline">
           ¿Olvidaste tu contraseña?
         </a>
       </div>

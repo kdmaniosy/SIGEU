@@ -32,7 +32,7 @@ export default function Calendario({ reservas, onDiaClick }: Props) {
   const [diaSeleccionado, setDiaSeleccionado] = useState<string | null>(null);
 
   function formatearFecha(anio: number, mes: number, dia: number) {
-    return `${String(dia).padStart(2, "0")}/${String(mes + 1).padStart(2, "0")}/${anio}`;
+  return `${anio}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
   }
 
   function reservasDelDia(fecha: string) {

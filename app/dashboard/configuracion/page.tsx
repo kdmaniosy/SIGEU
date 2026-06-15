@@ -101,11 +101,11 @@ export default function ConfiguracionPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {label} {required && <span className="text-red-500">*</span>}
             </label>
-            <input
+            <input 
               type="text"
               value={form[key]}
               onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+              className="w-full border border-gray-200 rounded-lg text-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
             />
           </div>
         ))}

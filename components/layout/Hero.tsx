@@ -1,6 +1,13 @@
+"use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Hero() {
+  const [autenticado, setAutenticado] = useState(() => {
+  if (typeof window === "undefined") return false;
+  return !!localStorage.getItem("token");
+  });
+
   return (
     <section className="bg-gradient-to-br from-red-700 to-red-900 text-white py-24 px-6 text-center">
       <div className="max-w-3xl mx-auto">
@@ -14,7 +21,10 @@ export default function Hero() {
           SIGEU te permite gestionar la disponibilidad de espacios del nuevo edificio de la facultad en tiempo real, sin filas ni papeleos.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/login" className="bg-white text-red-700 font-bold px-8 py-3 rounded-lg hover:bg-red-50 transition-colors text-sm">
+          <Link
+            href={autenticado ? "/dashboard" : "/login"}
+            className="bg-white text-red-700 font-bold px-8 py-3 rounded-lg hover:bg-red-50 transition-colors text-sm"
+          >
             Comenzar ahora
           </Link>
           <Link href="/#how" className="border border-white text-white font-semibold px-8 py-3 rounded-lg hover:bg-red-800 transition-colors text-sm">
