@@ -123,7 +123,7 @@ export default function Navbar() {
                   <span>🏠</span> Mi dashboard
                 </Link>
                 <Link
-                  href="/reservas"
+                  href="/dashboard/mis-reservas"
                   onClick={() => setMenuAbierto(false)}
                   className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                 >
