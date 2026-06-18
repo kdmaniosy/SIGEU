@@ -5,23 +5,29 @@ import AforoWidget from "@/components/ui/AforoWidget";
 import RegistrarAdmin from "@/components/ui/RegistrarAdmin";
 import ModalConfirmacion from "@/components/ui/ModalConfirmacion";
 
+// Interfaz para las props del componente
 interface Props {
   usuario: { code: string; name1: string; usertype_id: string };
 }
 
 
+// Mapeos para mostrar estado de reservas con etiquetas y colores
 const estadoLabel: Record<string, string> = {
   P: "Pendiente",
   A: "Confirmada",
   C: "Cancelada",
 };
 
+
+// Colores para cada estado de reserva
 const estadoColor: Record<string, string> = {
   P: "bg-yellow-100 text-yellow-700",
   A: "bg-green-100 text-green-700",
   C: "bg-red-100 text-red-700",
 };
 
+
+// Componente principal del dashboard de administración
 export default function DashboardAdmin({ usuario }: Props) {
   const [reservas, setReservas] = useState<any[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
@@ -36,6 +42,8 @@ export default function DashboardAdmin({ usuario }: Props) {
     cargarDatos();
   }, []);
 
+
+// Función para cargar reservas, usuarios y espacios desde el backend
 async function cargarDatos() {
   setCargando(true);
   try {
@@ -56,16 +64,22 @@ async function cargarDatos() {
   }
 }
 
+
+// Funciones para manejar apertura y cierre del modal de confirmación de cancelación
 function abrirModal(reservation_number: string) {
   setReservaSeleccionada(reservation_number);
   setModalVisible(true);
 }
 
+
+// Función para cerrar el modal y limpiar la reserva seleccionada
 function cerrarModal() {
   setModalVisible(false);
   setReservaSeleccionada(null);
 }
 
+
+// Función para confirmar la cancelación de una reserva
 async function confirmarCancelacion() {
   if (!reservaSeleccionada) return;
   try {
@@ -79,6 +93,7 @@ async function confirmarCancelacion() {
   }
 }
 
+// Filtrar reservas activas (no canceladas) para mostrar estadísticas
   const reservasActivas = reservas.filter((r: any) => r.detalles?.[0]?.status !== "C");
   const rolLabel: Record<string, string> = { ES: "Estudiante", DO: "Docente", AD: "Admin" };
 

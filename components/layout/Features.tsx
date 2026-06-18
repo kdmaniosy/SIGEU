@@ -1,3 +1,5 @@
+// Componente para mostrar las características principales de SIGEU
+
 const features = [
   {
     icon: "🏫",
@@ -31,6 +33,8 @@ const features = [
   },
 ];
 
+
+// Componente principal para mostrar las características de SIGEU
 export default function Features() {
   return (
     <section id="features" className="py-20 px-6 bg-gray-50">

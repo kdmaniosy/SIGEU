@@ -2,18 +2,21 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Interfaces para tipar los datos de las reservas
 interface Detalle {
   space_id: string;
   building_id: string;
   status: string;
 }
 
+// Cada reserva tiene un número, una fecha y una lista de detalles
 interface Reserva {
   reservation_number: string;
   date: string;
   detalles: Detalle[];
 }
 
+// Componente principal de la página de estadísticas
 export default function EstadisticasPage() {
   const router = useRouter();
   const [reservas, setReservas] = useState<Reserva[]>([]);
@@ -37,11 +40,13 @@ export default function EstadisticasPage() {
       .then(setReservas);
   }, [montado]);
 
+  // Procesamiento de datos para estadísticas
   const totalDetalles = reservas.flatMap((r) => r.detalles);
   const activos    = totalDetalles.filter((d) => d.status === "A").length;
   const cancelados = totalDetalles.filter((d) => d.status === "C").length;
   const pendientes = totalDetalles.filter((d) => d.status === "P").length;
 
+  // Contar la frecuencia de cada espacio reservado
   const frecuencia: Record<string, number> = {};
   totalDetalles.forEach((d) => {
     const key = `${d.space_id} / ${d.building_id}`;
@@ -49,6 +54,7 @@ export default function EstadisticasPage() {
   });
   const espaciosOrdenados = Object.entries(frecuencia).sort((a, b) => b[1] - a[1]);
 
+  // Datos para mostrar en las tarjetas de estadísticas
   const stats = [
     { label: "Total reservas",   value: reservas.length, color: "bg-blue-50 text-blue-700",   icon: "📅" },
     { label: "Detalles activos", value: activos,          color: "bg-green-50 text-green-700", icon: "✅" },
@@ -58,6 +64,7 @@ export default function EstadisticasPage() {
 
   if (!montado) return null;
 
+  // Renderizado de la página con estadísticas y gráficos
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Estadisticas</h1>

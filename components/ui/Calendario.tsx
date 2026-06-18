@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 
+
+//Este componente muestra un calendario con dos vistas: mensual y semanal. Permite navegar entre meses y semanas, y al hacer clic en un día, muestra las reservas asociadas a esa fecha. Las reservas se representan con puntos de colores según su estado (confirmada, pendiente, completada, cancelada). El componente también resalta el día actual y el día seleccionado.
 interface Reserva {
   id: number;
   espacio: string;
@@ -9,14 +11,20 @@ interface Reserva {
   estado: string;
 }
 
+
+//Define una interfaz Props que especifica las propiedades que el componente Calendario espera recibir. En este caso, se espera un array de reservas y una función opcional onDiaClick que se ejecutará cuando se haga clic en un día del calendario.
 interface Props {
   reservas: Reserva[];
   onDiaClick?: (fecha: string) => void;
 }
 
+
+//Constantes para los nombres de los meses, días de la semana y colores asociados a los estados de las reservas.
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const DIAS = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 
+
+// Define un objeto estadoColor que asigna un color de fondo a cada estado de reserva. Esto se utiliza para mostrar visualmente el estado de cada reserva en el calendario.
 const estadoColor: Record<string, string> = {
   Confirmada: "bg-green-500",
   Pendiente: "bg-yellow-400",
@@ -24,6 +32,8 @@ const estadoColor: Record<string, string> = {
   Cancelada: "bg-red-400",
 };
 
+
+// El componente Calendario utiliza el hook useState para manejar el estado de la vista actual (mensual o semanal), el mes y año actuales, y el día seleccionado. La función formatearFecha se utiliza para convertir una fecha en formato "YYYY-MM-DD", y la función reservasDelDia filtra las reservas para obtener solo las que corresponden a una fecha específica. La función handleDiaClick actualiza el día seleccionado y llama a la función onDiaClick si está definida. Las funciones diasDelMes y semanaActual calculan los días del mes actual y los días de la semana actual, respectivamente.
 export default function Calendario({ reservas, onDiaClick }: Props) {
   const hoy = new Date();
   const [vista, setVista] = useState<"mensual" | "semanal">("mensual");
@@ -31,25 +41,32 @@ export default function Calendario({ reservas, onDiaClick }: Props) {
   const [anioActual, setAnioActual] = useState(hoy.getFullYear());
   const [diaSeleccionado, setDiaSeleccionado] = useState<string | null>(null);
 
+  
+  // La función formatearFecha toma un año, mes y día como argumentos y devuelve una cadena de texto en formato "YYYY-MM-DD". Esto se utiliza para estandarizar el formato de las fechas al comparar con las reservas.
   function formatearFecha(anio: number, mes: number, dia: number) {
   return `${anio}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
   }
 
+  // La función reservasDelDia toma una fecha como argumento y devuelve un array de reservas que corresponden a esa fecha. Esto se utiliza para mostrar las reservas asociadas a un día específico cuando se hace clic en él.
   function reservasDelDia(fecha: string) {
     return reservas.filter((r) => r.fecha === fecha);
   }
 
+
+  // La función handleDiaClick se ejecuta cuando se hace clic en un día del calendario. Actualiza el estado diaSeleccionado con la fecha del día clickeado y llama a la función onDiaClick si está definida, pasando la fecha como argumento.
   function handleDiaClick(fecha: string) {
     setDiaSeleccionado(fecha);
     onDiaClick?.(fecha);
   }
 
+  // La función diasDelMes calcula el día de la semana del primer día del mes actual y el número total de días en ese mes. Esto se utiliza para renderizar correctamente los días en la vista mensual del calendario.
   function diasDelMes() {
     const primero = new Date(anioActual, mesActual, 1).getDay();
     const total = new Date(anioActual, mesActual + 1, 0).getDate();
     return { primero, total };
   }
 
+  // La función semanaActual calcula las fechas de los días de la semana actual, comenzando desde el domingo. Esto se utiliza para renderizar los días en la vista semanal del calendario.
   function semanaActual() {
     const inicioSemana = new Date(hoy);
     inicioSemana.setDate(hoy.getDate() - hoy.getDay());
@@ -60,9 +77,12 @@ export default function Calendario({ reservas, onDiaClick }: Props) {
     });
   }
 
+  // Se obtienen el día de la semana del primer día del mes y el número total de días en el mes actual utilizando la función diasDelMes. También se obtienen las fechas de los días de la semana actual utilizando la función semanaActual. Estos valores se utilizan posteriormente para renderizar el calendario correctamente.
   const { primero, total } = diasDelMes();
   const diasSemana = semanaActual();
 
+
+  // El componente retorna un JSX que representa la estructura del calendario. Incluye botones para navegar entre meses y semanas, y muestra los días del mes o de la semana según la vista seleccionada. Al hacer clic en un día, se muestran las reservas asociadas a esa fecha debajo del calendario.
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
       <div className="flex items-center justify-between mb-5">

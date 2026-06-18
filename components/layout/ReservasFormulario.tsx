@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { reservasService } from "@/lib/api";
 
+
+// Interfaz para representar un espacio disponible para reserva
 interface Espacio {
   space_id: string;
   building_id: string;
@@ -12,10 +14,14 @@ interface Espacio {
   edificio?: { name: string };
 }
 
+
+// Props para el componente de formulario de reservas
 interface Props {
   espacioSeleccionado: Espacio | null;
 }
 
+
+// Componente principal para mostrar el formulario de confirmación de reserva en la página de reservas
 export default function ReservasFormulario({ espacioSeleccionado }: Props) {
   const [form, setForm] = useState({
     fecha: "",
@@ -23,6 +29,8 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
     hora_fin: "",
     motivo: "",
   });
+
+  // Estados para manejar la carga, errores y éxito de la reserva
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
   const [exito, setExito] = useState(false);
@@ -33,10 +41,14 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
     if (data) setUsuario(JSON.parse(data));
   }, []);
 
+  
+  // Función para manejar cambios en los campos del formulario
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+
+  // Función para manejar la creación de la reserva al hacer clic en el botón de confirmar
   async function handleReservar() {
     if (!espacioSeleccionado) {
       setError("Por favor selecciona un espacio de la lista.");
@@ -55,6 +67,7 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
       return;
     }
 
+    // Iniciar el proceso de reserva: mostrar estado de carga, limpiar errores y luego intentar crear la reserva
     setCargando(true);
     setError("");
     setExito(false);
@@ -67,6 +80,7 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
       code: usuario.code,
      });
 
+     // Agregar el detalle de la reserva con la información del espacio seleccionado y el horario
     await reservasService.agregarDetalle(reservation_number, {
     line_number: 1,
     reservation_number,
@@ -86,6 +100,7 @@ export default function ReservasFormulario({ espacioSeleccionado }: Props) {
     }
   }
 
+  // Renderizar el formulario de confirmación de reserva con campos para fecha, horario y motivo, además de mostrar el espacio seleccionado y el usuario autenticado
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-6">
       <h2 className="text-lg font-bold text-gray-900 mb-6">Confirmar reserva</h2>

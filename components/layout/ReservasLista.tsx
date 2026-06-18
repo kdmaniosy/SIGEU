@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { espaciosService } from "@/lib/api";
 
+
+// Interfaz para representar un espacio disponible para reserva
 interface Espacio {
   space_id: string;
   building_id: string;
@@ -12,17 +14,23 @@ interface Espacio {
   edificio?: { name: string };
 }
 
+
+// Props para el componente de lista de espacios disponibles en la página de reservas
 interface Props {
   onSeleccionar: (espacio: Espacio) => void;
   espacioSeleccionado: Espacio | null;
   filtros: { tipo?: string; capacidad_min?: number };
 }
 
+
+// Componente principal para mostrar la lista de espacios disponibles en la página de reservas
 export default function ReservasLista({ onSeleccionar, espacioSeleccionado, filtros }: Props) {
   const [espacios, setEspacios] = useState<Espacio[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
+
+  // Efecto para cargar los espacios disponibles cada vez que cambian los filtros
   useEffect(() => {
     cargarEspacios();
   }, [filtros]);
@@ -40,6 +48,7 @@ export default function ReservasLista({ onSeleccionar, espacioSeleccionado, filt
     }
   }
 
+  // Renderizar estados de carga, error o la lista de espacios disponibles según corresponda
   if (cargando) {
     return (
       <div
@@ -58,6 +67,7 @@ export default function ReservasLista({ onSeleccionar, espacioSeleccionado, filt
     );
   }
 
+  // Mostrar mensaje de error si no se pudieron cargar los espacios, con opción para reintentar
   if (error) {
     return (
       <div
@@ -77,6 +87,7 @@ export default function ReservasLista({ onSeleccionar, espacioSeleccionado, filt
     );
   }
 
+  // Mostrar mensaje si no se encontraron espacios disponibles según los filtros aplicados
   if (espacios.length === 0) {
     return (
       <div
@@ -89,6 +100,8 @@ export default function ReservasLista({ onSeleccionar, espacioSeleccionado, filt
     );
   }
 
+
+  // Renderizar la lista de espacios disponibles con información relevante y botón para seleccionar cada espacio
   return (
     <div
       role="list"

@@ -2,12 +2,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+
+// Componente principal del hero de la página de inicio
 export default function Hero() {
   const [autenticado, setAutenticado] = useState(() => {
   if (typeof window === "undefined") return false;
   return !!localStorage.getItem("token");
   });
 
+  // Efecto para actualizar el estado de autenticación al montar el componente
   return (
     <section className="bg-gradient-to-br from-red-700 to-red-900 text-white py-24 px-6 text-center">
       <div className="max-w-3xl mx-auto">

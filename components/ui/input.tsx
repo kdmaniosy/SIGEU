@@ -3,6 +3,8 @@ import { Input as InputPrimitive } from "@base-ui/react/input"
 
 import { cn } from "@/lib/utils"
 
+
+// Este archivo define un componente de entrada (Input) que se basa en el componente InputPrimitive de la biblioteca @base-ui/react/input. El componente Input aplica estilos específicos utilizando Tailwind CSS para crear un campo de entrada estilizado y funcional. La función cn se utiliza para combinar las clases de Tailwind CSS con cualquier clase adicional que se pase a través de props, lo que permite una fácil personalización del estilo del componente. El componente también maneja diferentes estados como deshabilitado, inválido y enfocado, aplicando estilos correspondientes para cada uno de estos estados.
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <InputPrimitive

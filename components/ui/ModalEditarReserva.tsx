@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { espaciosService, reservasService } from "@/lib/api";
 
+// Este archivo define un componente de modal llamado ModalEditarReserva que se utiliza para editar los detalles de una reserva existente. El modal permite al usuario cambiar la fecha de la reserva y seleccionar un espacio diferente. El componente maneja el estado local para la fecha, el espacio seleccionado, los espacios disponibles, así como los estados de carga, error y éxito. Al abrir el modal, se cargan los espacios disponibles y se inicializan los campos con los datos de la reserva actual. Al guardar los cambios, se realizan llamadas a la API para actualizar tanto la cabecera como el detalle de la reserva, y se muestra un mensaje de éxito o error según corresponda.
 interface Espacio {
   space_id: string;
   building_id: string;
@@ -12,6 +13,7 @@ interface Espacio {
   edificio?: { name: string };
 }
 
+// La interfaz ReservaDetalle representa los detalles específicos de una reserva, incluyendo el número de línea, número de reserva, identificadores del espacio y edificio, horarios de inicio y fin, y el estado de la reserva.
 interface ReservaDetalle {
   line_number: number;
   reservation_number: string;
@@ -22,6 +24,8 @@ interface ReservaDetalle {
   status: string;
 }
 
+
+// La interfaz Reserva representa la estructura general de una reserva, incluyendo el número de reserva, fecha, código y un arreglo opcional de detalles de la reserva.
 interface Reserva {
   reservation_number: string;
   date: string;
@@ -29,6 +33,8 @@ interface Reserva {
   detalles?: ReservaDetalle[];
 }
 
+
+// La interfaz Props define las propiedades que el componente ModalEditarReserva espera recibir. Estas incluyen la visibilidad del modal, la reserva que se va a editar, y las funciones para cerrar el modal y guardar los cambios realizados.
 interface Props {
   visible: boolean;
   reserva: Reserva | null;
@@ -36,6 +42,8 @@ interface Props {
   onSave: () => void;
 }
 
+
+// El componente ModalEditarReserva es el componente principal que representa el modal de edición de reserva. Utiliza las props para controlar su comportamiento y apariencia, y maneja el estado local para los campos del formulario, así como los estados de carga, error y éxito.
 export default function ModalEditarReserva({ visible, reserva, onClose, onSave }: Props) {
   const [fecha, setFecha] = useState("");
   const [espacioSeleccionado, setEspacioSeleccionado] = useState(""); // formato: "space_id|building_id"
@@ -45,12 +53,14 @@ export default function ModalEditarReserva({ visible, reserva, onClose, onSave }
   const [error, setError] = useState("");
   const [exito, setExito] = useState(false);
 
+  // El hook useEffect se utiliza para cargar los espacios disponibles y inicializar los campos del formulario cada vez que el modal se abre (cuando la prop "visible" cambia a true) o cuando la reserva a editar cambia. Si la reserva está disponible, se establecen los valores iniciales para la fecha y el espacio seleccionado, y se llama a la función cargarEspacios para obtener la lista de espacios disponibles desde la API.
   useEffect(() => {
     if (visible && reserva) {
       setError("");
       setExito(false);
       setFecha(reserva.date);
       
+      // Si la reserva tiene detalles, se toma el primer detalle para establecer el espacio seleccionado. Si no hay detalles, se deja el espacio seleccionado vacío.
       const primerDetalle = reserva.detalles?.[0];
       if (primerDetalle) {
         setEspacioSeleccionado(`${primerDetalle.space_id}|${primerDetalle.building_id}`);
@@ -62,6 +72,7 @@ export default function ModalEditarReserva({ visible, reserva, onClose, onSave }
     }
   }, [visible, reserva]);
 
+  // La función cargarEspacios es una función asíncrona que se encarga de obtener la lista de espacios disponibles desde la API. Durante la carga, se establece el estado cargandoEspacios en true para mostrar un indicador de carga. Si la carga es exitosa, se actualiza el estado espacios con los datos obtenidos. Si ocurre un error durante la carga, se establece un mensaje de error en el estado error. Finalmente, independientemente del resultado, se establece cargandoEspacios en false para ocultar el indicador de carga.
   async function cargarEspacios() {
     setCargandoEspacios(true);
     try {
@@ -74,6 +85,7 @@ export default function ModalEditarReserva({ visible, reserva, onClose, onSave }
     }
   }
 
+  // La función handleGuardar es una función asíncrona que se ejecuta cuando el usuario hace clic en el botón para guardar los cambios realizados en la reserva. La función realiza varias validaciones para asegurarse de que se haya seleccionado una fecha y un espacio válidos. Si las validaciones pasan, se realizan llamadas a la API para actualizar tanto la cabecera como el detalle de la reserva con los nuevos datos. Durante el proceso de guardado, se establece el estado guardando en true para mostrar un indicador de carga, y se manejan los estados de error y éxito según corresponda.
   async function handleGuardar() {
     if (!reserva) return;
     if (!fecha) {
@@ -85,10 +97,13 @@ export default function ModalEditarReserva({ visible, reserva, onClose, onSave }
       return;
     }
 
+    // Validar formato de espacio seleccionado
     setGuardando(true);
     setError("");
     setExito(false);
 
+
+    // El bloque try-catch se utiliza para manejar posibles errores durante el proceso de guardado.
     try {
       const [space_id, building_id] = espacioSeleccionado.split("|");
       const primerDetalle = reserva.detalles?.[0];
@@ -124,6 +139,7 @@ export default function ModalEditarReserva({ visible, reserva, onClose, onSave }
         status,
       });
 
+      // Si todo se actualiza correctamente, se muestra un mensaje de éxito y se cierra el modal después de un breve retraso para permitir que el usuario vea el mensaje.
       setExito(true);
       setTimeout(() => {
         onSave();
@@ -136,8 +152,11 @@ export default function ModalEditarReserva({ visible, reserva, onClose, onSave }
     }
   }
 
+  // Si el modal no es visible o no hay una reserva para editar, el componente no renderiza nada (retorna null).
   if (!visible || !reserva) return null;
 
+
+  // El modal se muestra como una superposición en la pantalla, con un fondo semitransparente que oscurece el contenido detrás de él. El contenido del modal está centrado tanto vertical como horizontalmente, y se utiliza un diseño de tarjeta con bordes redondeados y sombra para darle un aspecto moderno y atractivo. Dentro del modal, se muestra un título con el número de reserva que se está editando, seguido de un botón para cerrar el modal. Luego, hay un formulario con campos para seleccionar la fecha de la reserva y el espacio seleccionado, así como mensajes de error o éxito según corresponda. Finalmente, hay dos botones: uno para cancelar los cambios (que cierra el modal) y otro para guardar los cambios (que ejecuta la función handleGuardar).
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">

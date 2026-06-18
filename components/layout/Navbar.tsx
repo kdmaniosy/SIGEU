@@ -4,17 +4,23 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/lib/ThemeContext";
 
+
+// Interfaz para el usuario autenticado
 interface Usuario {
   code: string;
   name1: string;
   usertype_id: string;
 }
 
+// Mapeo para mostrar el rol del usuario con etiquetas legibles
+
 const ROL_LABEL: Record<string, string> = {
   ES: "Estudiante",
   DO: "Docente",
   AD: "Administrador",
 };
+
+// Componente principal del navbar del sitio web
 
 export default function Navbar() {
   const router = useRouter();
@@ -35,6 +41,7 @@ export default function Navbar() {
     }
   }, []);
 
+  // Efecto para cerrar el menú de usuario al hacer clic fuera de él
   useEffect(() => {
     function handleClickFuera(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -45,6 +52,8 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickFuera);
   }, []);
 
+
+  // Función para cerrar sesión: limpia el token y redirige al login
   function handleCerrarSesion() {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
@@ -53,6 +62,7 @@ export default function Navbar() {
     router.push("/");
   }
 
+  //  Renderizar el navbar con enlaces de navegación y menú de usuario si está autenticado
   return (
     <nav role="navigation" 
     aria-label="Navegación principal" 
@@ -78,7 +88,6 @@ export default function Navbar() {
         >
         {isDark ? "☀️" : "🌙"}
       </button>
-
 
       {usuario ? (
         <div className="relative" ref={menuRef}>

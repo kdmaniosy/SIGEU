@@ -5,6 +5,7 @@ import ReservasFiltros from "@/components/layout/ReservasFiltros";
 import ReservasLista from "@/components/layout/ReservasLista";
 import ReservasFormulario from "@/components/layout/ReservasFormulario";
 
+// Interfaz para tipar los datos de un espacio disponible para reserva
 interface Espacio {
   space_id: string;
   building_id: string;
@@ -15,11 +16,13 @@ interface Espacio {
   edificio?: { name: string };
 }
 
+// Interfaz para tipar los filtros de búsqueda de espacios
 interface Filtros {
   tipo?: string;
   capacidad_min?: number;
 }
 
+// Componente principal de la página de reservas
 export default function ReservasPage() {
   const [espacioSeleccionado, setEspacioSeleccionado] = useState<Espacio | null>(null);
   const [filtros, setFiltros] = useState<Filtros>({});

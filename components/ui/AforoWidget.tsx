@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { aforoService } from "@/lib/api";
 import { ToastContainer, useToast } from "@/components/ui/Toast";
 
+// Interfaz para representar los datos de aforo de un espacio
 interface AforoData {
   space_id: string;
   building_id: string;
@@ -10,6 +11,8 @@ interface AforoData {
   registrado_en?: string;
 }
 
+
+// Interfaz para representar un espacio con su información básica
 interface Espacio {
   space_id: string;
   building_id: string;
@@ -17,12 +20,18 @@ interface Espacio {
   capacity: number;
 }
 
+
+// Props para el componente del widget de control de aforo en tiempo real, que recibe la lista de espacios a monitorear
 interface Props {
   espacios: Espacio[];
 }
 
+
+// URL base para acceder a los streams de video de los espacios, configurable mediante variable de entorno
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+
+// Componente principal para mostrar el widget de control de aforo en tiempo real, con alertas visuales y opción para ver el stream de video de cada espacio
 export default function AforoWidget({ espacios }: Props) {
   const [aforoData, setAforoData] = useState<Record<string, AforoData>>({});
   const [cargando, setCargando] = useState(true);
@@ -30,12 +39,16 @@ export default function AforoWidget({ espacios }: Props) {
   const { toasts, agregar, cerrar } = useToast();
   const alertasEnviadas = useRef<Set<string>>(new Set());
 
+
+  // Función para cargar los datos de aforo de todos los espacios, con lógica para enviar alertas cuando se superan ciertos umbrales de capacidad
   const cargarAforo = useCallback(async () => {
     if (espacios.length === 0) return;
     try {
       const resultados = await aforoService.obtenerTodosActual();
       const datos: Record<string, AforoData> = {};
 
+
+      // Inicializar el objeto de datos de aforo con los espacios registrados, asignando 0 personas detectadas por defecto para cada espacio
       espacios.forEach((e) => {
         datos[`${e.space_id}-${e.building_id}`] = {
           space_id: e.space_id,
@@ -44,18 +57,24 @@ export default function AforoWidget({ espacios }: Props) {
         };
       });
 
+
+      // Procesar los resultados obtenidos del servicio de aforo y actualizar el estado con los datos más recientes, además de enviar alertas si se superan ciertos umbrales de capacidad
       resultados.forEach((r: AforoData) => {
         const key = `${r.space_id}-${r.building_id}`;
         datos[key] = r;
 
+        // Buscar el espacio correspondiente a los datos de aforo obtenidos para calcular el porcentaje de ocupación y determinar si se deben enviar alertas
         const espacio = espacios.find(
           (e) => e.space_id === r.space_id && e.building_id === r.building_id
         );
         if (!espacio) return;
 
+        // Calcular el porcentaje de ocupación del espacio y generar una clave única para las alertas basadas en el espacio y el umbral de capacidad alcanzado
         const porcentaje = (r.personas_detectadas / espacio.capacity) * 100;
         const alertaKey = `${r.space_id}-${r.building_id}-${Math.floor(porcentaje / 10)}`;
 
+
+        // Enviar alertas si el porcentaje de ocupación supera el 80% o el 100%, asegurándose de no enviar la misma alerta múltiples veces para el mismo espacio y umbral
         if (porcentaje >= 100 && !alertasEnviadas.current.has(`full-${alertaKey}`)) {
           agregar(`🚨 ${espacio.name} superó su capacidad máxima (${r.personas_detectadas}/${espacio.capacity} personas)`, "error");
           alertasEnviadas.current.add(`full-${alertaKey}`);
@@ -65,6 +84,8 @@ export default function AforoWidget({ espacios }: Props) {
         }
       });
 
+
+      // Limpiar las alertas de espacios que han bajado de los umbrales de capacidad para permitir enviar nuevas alertas si vuelven a subir
       setAforoData(datos);
     } catch {
       const datos: Record<string, AforoData> = {};
@@ -81,22 +102,30 @@ export default function AforoWidget({ espacios }: Props) {
     }
   }, [espacios, agregar]);
 
+
+  // Efecto para cargar los datos de aforo al montar el componente y configurar un intervalo para actualizar los datos cada 10 segundos, limpiando el intervalo al desmontar el componente
   useEffect(() => {
     cargarAforo();
     const intervalo = setInterval(cargarAforo, 10000);
     return () => clearInterval(intervalo);
   }, [cargarAforo]);
 
+
+  // Función para calcular el porcentaje de ocupación de un espacio basado en el número de personas detectadas y la capacidad total del espacio, asegurándose de no exceder el 100%
   function getPorcentaje(personas: number, capacidad: number) {
     return Math.min(Math.round((personas / capacidad) * 100), 100);
   }
 
+
+  // Función para determinar las clases de estilo CSS a aplicar a la barra de progreso y al texto del porcentaje basado en el nivel de ocupación del espacio, utilizando colores verde, amarillo y rojo para indicar niveles bajos, medios y altos de ocupación respectivamente
   function getColor(porcentaje: number) {
     if (porcentaje >= 100) return { bar: "bg-red-600", text: "text-red-700", bg: "bg-red-50" };
     if (porcentaje >= 80) return { bar: "bg-yellow-400", text: "text-yellow-700", bg: "bg-yellow-50" };
     return { bar: "bg-green-500", text: "text-green-700", bg: "bg-green-50" };
   }
 
+
+  // Renderizado del componente, mostrando el título, el estado de actualización en vivo, la lista de espacios con su información de aforo y opciones para ver el stream de video de cada espacio, además de mostrar alertas visuales cuando se superan ciertos umbrales de capacidad
   return (
     <>
       <ToastContainer toasts={toasts} onCerrar={cerrar} />
@@ -132,7 +161,7 @@ export default function AforoWidget({ espacios }: Props) {
             </div>
           </div>
         )}
-
+        
         {cargando ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -152,6 +181,7 @@ export default function AforoWidget({ espacios }: Props) {
               const streamActivo = espacioStream?.space_id === espacio.space_id &&
                 espacioStream?.building_id === espacio.building_id;
 
+                // Renderizar la tarjeta de información para cada espacio, mostrando el nombre del espacio, el número de personas detectadas, la capacidad total, el porcentaje de ocupación con colores indicativos y un botón para ver el stream de video si está disponible
               return (
                 <div key={key} className={`p-4 rounded-lg border transition-all ${
                   streamActivo ? "border-red-400 ring-2 ring-red-100" : "border-transparent"

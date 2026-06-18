@@ -5,28 +5,37 @@ import ModalConfirmacion from "@/components/ui/ModalConfirmacion";
 import Calendario from "@/components/ui/Calendario";
 import { reservasService } from "@/lib/api";
 
+// Interfaz para las props del componente
 interface Usuario {
   code: string;
   name1: string;
   usertype_id: string;
 }
 
+
+// Interfaz para las props del componente
 interface Props {
   usuario: Usuario;
 }
 
+
+// Mapeos para mostrar estado de reservas con etiquetas y colores
 const estadoLabel: Record<string, string> = {
   P: "Pendiente",
   A: "Confirmada",
   C: "Cancelada",
 };
 
+
+// Colores para cada estado de reserva
 const estadoColor: Record<string, string> = {
   P: "bg-yellow-100 text-yellow-700",
   A: "bg-green-100 text-green-700",
   C: "bg-red-100 text-red-700",
 };
 
+
+// Componente principal del dashboard de docentes
 export default function DashboardDocente({ usuario }: Props) {
   const [reservasActivas, setReservasActivas] = useState<any[]>([]);
   const [historial, setHistorial] = useState<any[]>([]);
@@ -52,11 +61,15 @@ export default function DashboardDocente({ usuario }: Props) {
     }
   }
 
+
+  // Funciones para manejar apertura y cierre del modal de confirmación de cancelación
   function abrirModal(reservation_number: string) {
     setReservaSeleccionada(reservation_number);
     setModalVisible(true);
   }
 
+
+  // Función para cerrar el modal y limpiar la reserva seleccionada
   async function confirmarCancelacion() {
     if (!reservaSeleccionada) return;
     try {
@@ -70,6 +83,8 @@ export default function DashboardDocente({ usuario }: Props) {
     }
   }
 
+
+  // Filtrar reservas activas (no canceladas) para mostrar estadísticas
   const reservasCalendario = reservasActivas.map((r: any) => ({
     id: r.reservation_number,
     espacio: r.detalles?.[0]?.space_id || "Espacio",
@@ -78,6 +93,7 @@ export default function DashboardDocente({ usuario }: Props) {
     estado: estadoLabel[r.detalles?.[0]?.status || "P"],
   }));
 
+  // Filtrar reservas activas (no canceladas) para mostrar estadísticas
   return (
     <div className="space-y-8">
       <ModalConfirmacion

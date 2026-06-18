@@ -1,3 +1,5 @@
+// Componente para el footer del sitio web
+
 export default function Footer() {
   return (
     <footer id="contact" className="bg-red-700 text-white pt-10 pb-6 px-6">

@@ -1,14 +1,20 @@
 "use client";
 
+
+//  Interfaz para los filtros de búsqueda de espacios en la página de reservas
 interface Filtros {
   tipo?: string;
   capacidad_min?: number;
 }
 
+
+// Props para el componente de filtros de reservas
 interface Props {
   onFiltrar: (filtros: Filtros) => void;
 }
 
+
+// Componente principal para mostrar los filtros de búsqueda en la página de reservas
 export default function ReservasFiltros({ onFiltrar }: Props) {
   function handleBuscar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -22,6 +28,7 @@ export default function ReservasFiltros({ onFiltrar }: Props) {
     });
   }
 
+  // Renderizar el formulario de filtros con opciones para tipo de espacio y capacidad mínima
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
       <form onSubmit={handleBuscar} role="search" aria-label="Filtros de búsqueda de espacios">

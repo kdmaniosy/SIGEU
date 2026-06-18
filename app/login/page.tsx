@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/api";
 
+
+// Componente principal de la página de login y registro
 export default function LoginPage() {
   const [tab, setTab] = useState<"login" | "registro">("login");
 
@@ -57,6 +59,7 @@ export default function LoginPage() {
   );
 }
 
+// Componente para el formulario de inicio de sesión
 function FormLogin() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -64,6 +67,7 @@ function FormLogin() {
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
 
+  // Función para manejar el proceso de inicio de sesión
   async function handleLogin() {
     if (!email || !contrasena) {
       setError("Por favor completa todos los campos.");
@@ -136,6 +140,7 @@ function FormLogin() {
   );
 }
 
+// Componente para el formulario de registro
 function FormRegistro() {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -150,6 +155,8 @@ function FormRegistro() {
     contrasena: "",
     confirmar: "",
   });
+
+  // Estado para manejar errores y carga durante el proceso de registro
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
 
@@ -157,6 +164,7 @@ function FormRegistro() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  // Función para manejar el proceso de registro
   async function handleRegistro() {
     if (!form.Code || !form.name1 || !form.last_name1 || !form.Email || !form.contrasena || !form.USERTYPE_ID) {
       setError("Por favor completa todos los campos obligatorios.");

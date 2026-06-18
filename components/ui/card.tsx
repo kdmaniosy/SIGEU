@@ -2,6 +2,8 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+
+// Este archivo define varios componentes relacionados con una tarjeta (Card) que se pueden usar para mostrar información de manera estructurada. El componente principal es Card, que es un contenedor para otros subcomponentes como CardHeader, CardTitle, CardDescription, CardAction, CardContent y CardFooter. Cada uno de estos subcomponentes tiene su propia función y estilos específicos para organizar el contenido dentro de la tarjeta. El uso de la función cn permite combinar clases de Tailwind CSS con cualquier clase adicional que se pase a través de props, lo que facilita la personalización de los estilos de cada componente.
 function Card({
   className,
   size = "default",
@@ -20,6 +22,7 @@ function Card({
   )
 }
 
+// El componente CardHeader es un contenedor para el encabezado de la tarjeta, que puede incluir el título y la descripción. Utiliza clases de Tailwind CSS para definir su apariencia y disposición, y también permite personalizar su estilo a través de props.
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -33,6 +36,8 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+
+// El componente CardTitle se utiliza para mostrar el título de la tarjeta. Aplica estilos específicos para el texto del título y también permite personalizar su apariencia a través de props.
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -46,6 +51,8 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+
+// El componente CardDescription se utiliza para mostrar una descripción o información adicional debajo del título de la tarjeta. Aplica estilos específicos para el texto de la descripción y también permite personalizar su apariencia a través de props.
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -56,6 +63,8 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+
+// El componente CardAction se utiliza para mostrar acciones relacionadas con la tarjeta, como botones o enlaces. Aplica estilos específicos para la disposición de las acciones y también permite personalizar su apariencia a través de props.
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -69,6 +78,8 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+
+// El componente CardContent se utiliza para mostrar el contenido principal de la tarjeta. Aplica estilos específicos para el espaciado y también permite personalizar su apariencia a través de props.
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -79,6 +90,8 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+
+// El componente CardFooter se utiliza para mostrar el pie de página de la tarjeta, que puede incluir información adicional o acciones relacionadas. Aplica estilos específicos para la disposición del pie de página y también permite personalizar su apariencia a través de props.
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -92,6 +105,8 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+
+// Finalmente, se exportan todos los componentes relacionados con la tarjeta para que puedan ser utilizados en otras partes de la aplicación. Esto permite que los desarrolladores importen y utilicen estos componentes de manera modular y reutilizable en diferentes contextos donde se necesite mostrar información estructurada en forma de tarjeta.
 export {
   Card,
   CardHeader,

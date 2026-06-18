@@ -1,10 +1,13 @@
 "use client";
 import { useState } from "react";
 
+// El componente RegistrarAdmin es un formulario que permite a los administradores registrar nuevos administradores en el sistema. El componente recibe una prop adminCode, que es un código de administrador necesario para autorizar la creación de nuevas cuentas de administrador. El formulario incluye campos para el código del nuevo administrador, su nombre, apellidos, correo electrónico, número de celular y contraseña. Al enviar el formulario, se realizan validaciones para asegurarse de que se hayan completado los campos obligatorios y que las contraseñas coincidan. Si las validaciones pasan, se realiza una solicitud POST a la API para registrar al nuevo administrador. Durante el proceso de registro, se muestra un indicador de carga y se manejan los estados de error y éxito para proporcionar retroalimentación al usuario.
 interface Props {
   adminCode: string;
 }
 
+
+// El componente utiliza varios estados para manejar la visibilidad del formulario, los datos del formulario, los mensajes de error, el estado de éxito y el estado de carga. La función handleChange se encarga de actualizar el estado del formulario a medida que el usuario ingresa datos, mientras que la función handleRegistrar se encarga de validar los datos y realizar la solicitud a la API para registrar al nuevo administrador.
 export default function RegistrarAdmin({ adminCode }: Props) {
   const [visible, setVisible] = useState(false);
   const [form, setForm] = useState({
@@ -18,14 +21,20 @@ export default function RegistrarAdmin({ adminCode }: Props) {
     contrasena: "",
     confirmar: "",
   });
+
+  // El estado error se utiliza para almacenar cualquier mensaje de error que pueda ocurrir durante el proceso de registro, mientras que el estado exito se utiliza para indicar si el registro fue exitoso. El estado cargando se utiliza para mostrar un indicador de carga mientras se realiza la solicitud a la API.
   const [error, setError] = useState("");
   const [exito, setExito] = useState(false);
   const [cargando, setCargando] = useState(false);
 
+
+  // La función handleChange se encarga de actualizar el estado del formulario cada vez que el usuario ingresa datos en los campos del formulario. Utiliza el evento onChange para capturar los cambios en los campos de entrada y actualiza el estado form con los nuevos valores ingresados por el usuario.
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+
+  // La función handleRegistrar es una función asíncrona que se ejecuta cuando el usuario hace clic en el botón para registrar un nuevo administrador. La función realiza varias validaciones para asegurarse de que se hayan completado los campos obligatorios y que las contraseñas coincidan. Si las validaciones pasan, se realiza una solicitud POST a la API para registrar al nuevo administrador, utilizando el código de administrador proporcionado en la prop adminCode para autorizar la creación de la cuenta. Durante el proceso de registro, se muestra un indicador de carga y se manejan los estados de error y éxito para proporcionar retroalimentación al usuario.
   async function handleRegistrar() {
     if (!form.code || !form.name1 || !form.last_name1 || !form.email || !form.contrasena) {
       setError("Por favor completa todos los campos obligatorios.");
@@ -35,6 +44,8 @@ export default function RegistrarAdmin({ adminCode }: Props) {
       setError("Las contraseñas no coinciden.");
       return;
     }
+
+    // Si las validaciones pasan, se inicia el proceso de registro estableciendo el estado cargando en true y limpiando cualquier mensaje de error previo. Luego, se realiza una solicitud POST a la API para registrar al nuevo administrador, enviando los datos del formulario en el cuerpo de la solicitud. Si la respuesta de la API no es exitosa, se captura el mensaje de error y se muestra al usuario. Si el registro es exitoso, se muestra un mensaje de éxito y se restablece el formulario. Finalmente, independientemente del resultado, se establece el estado cargando en false para ocultar el indicador de carga.
     setCargando(true);
     setError("");
     try {
@@ -56,6 +67,8 @@ export default function RegistrarAdmin({ adminCode }: Props) {
           }),
         }
       );
+
+      // Si la respuesta de la API no es exitosa, se captura el mensaje de error y se muestra al usuario. Si el registro es exitoso, se muestra un mensaje de éxito y se restablece el formulario. Finalmente, independientemente del resultado, se establece el estado cargando en false para ocultar el indicador de carga.
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.detail || "Error al registrar administrador");
@@ -70,6 +83,7 @@ export default function RegistrarAdmin({ adminCode }: Props) {
     }
   }
 
+  // El componente renderiza una tarjeta con un título y una descripción, junto con un botón para mostrar u ocultar el formulario de registro. Si el estado visible es true, se muestra el formulario con los campos necesarios para registrar un nuevo administrador, así como mensajes de error o éxito según corresponda. El botón para registrar al nuevo administrador se deshabilita mientras se está realizando la solicitud a la API para evitar múltiples envíos.
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
       <div className="flex items-center justify-between">

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ModalConfirmacion from "@/components/ui/ModalConfirmacion";
 
+// Interfaces para tipar los datos de las reservas
 interface Detalle {
   line_number: number;
   space_id: string;
@@ -12,6 +13,7 @@ interface Detalle {
   status: string;
 }
 
+// Cada reserva tiene un número, una fecha, un código de usuario y una lista de detalles
 interface Reserva {
   reservation_number: string;
   date: string;
@@ -19,6 +21,7 @@ interface Reserva {
   detalles: Detalle[];
 }
 
+// Mapas para mostrar etiquetas y colores según el estado de cada detalle
 const STATUS_LABEL: Record<string, string> = { A: "Activo", C: "Cancelado", P: "Pendiente" };
 const STATUS_COLOR: Record<string, string> = {
   A: "bg-green-100 text-green-700",
@@ -26,6 +29,8 @@ const STATUS_COLOR: Record<string, string> = {
   P: "bg-yellow-100 text-yellow-700",
 };
 
+
+// Componente principal de la página de mis reservas
 export default function MisReservasPage() {
   const router = useRouter();
   const [reservas, setReservas] = useState<Reserva[]>([]);
@@ -70,6 +75,7 @@ export default function MisReservasPage() {
     setReservaSeleccionada(null);
   }
 
+  // Función para confirmar la cancelación de una reserva
   async function confirmarCancelacion() {
     if (!reservaSeleccionada) return;
     const usuarioRaw = localStorage.getItem("usuario");
@@ -102,6 +108,7 @@ export default function MisReservasPage() {
     }
   }
 
+  // Función para verificar si una reserva tiene detalles activos
   const tieneActivos = (r: Reserva) => r.detalles.some((d) => d.status !== "C");
 
   if (!montado) return null;

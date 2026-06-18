@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+
+// Componente principal de la página de recuperación de contraseña
 export default function RecuperarPasswordPage() {
   const router = useRouter();
   const [paso, setPaso] = useState<"email" | "codigo">("email");
@@ -16,6 +18,8 @@ export default function RecuperarPasswordPage() {
   const [exito, setExito] = useState("");
   const [cargando, setCargando] = useState(false);
 
+
+  // Función para manejar el proceso de solicitud del código de recuperación
   async function handleSolicitarCodigo() {
     if (!email) {
       setError("Por favor ingresa tu correo institucional.");
@@ -40,6 +44,8 @@ export default function RecuperarPasswordPage() {
     }
   }
 
+
+  // Función para manejar el proceso de verificación del código y cambio de contraseña
   async function handleVerificarCodigo() {
     if (!codigo || !nuevaContrasena || !confirmar) {
       setError("Por favor completa todos los campos.");
@@ -67,7 +73,8 @@ export default function RecuperarPasswordPage() {
       setCargando(false);
     }
   }
-
+  
+  // Renderizado del formulario de recuperación de contraseña con manejo de estados y mensajes
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -100,7 +107,7 @@ export default function RecuperarPasswordPage() {
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
-
+              
               {error && (
                 <p role="alert" aria-live="assertive" className="text-red-600 text-sm bg-red-50 px-4 py-2 rounded-lg">
                   {error}

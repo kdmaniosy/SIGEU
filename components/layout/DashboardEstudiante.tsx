@@ -5,12 +5,16 @@ import ModalConfirmacion from "@/components/ui/ModalConfirmacion";
 import Calendario from "@/components/ui/Calendario";
 import { reservasService } from "@/lib/api";
 
+
+// Interfaz para las props del componente
 interface Usuario {
   code: string;
   name1: string;
   usertype_id: string;
 }
 
+
+// Interfaz para las props del componente
 interface Reserva {
   id: number;
   espacio: string;
@@ -19,10 +23,14 @@ interface Reserva {
   estado: string;
 }
 
+
+// Interfaz para las props del componente
 interface Props {
   usuario: Usuario;
 }
 
+
+// Colores para cada estado de reserva
 const estadoColor: Record<string, string> = {
   Confirmada: "bg-green-100 text-green-700",
   Pendiente: "bg-yellow-100 text-yellow-700",
@@ -33,12 +41,16 @@ const estadoColor: Record<string, string> = {
   C: "bg-red-100 text-red-700",
 };
 
+
+//  Mapeo para mostrar estado de reservas con etiquetas legibles
 const estadoLabel: Record<string, string> = {
   P: "Pendiente",
   A: "Confirmada",
   C: "Cancelada",
 };
 
+
+// Componente principal del dashboard de estudiantes
 export default function DashboardEstudiante({ usuario }: Props) {
   const [reservasActivas, setReservasActivas] = useState<any[]>([]);
   const [historial, setHistorial] = useState<any[]>([]);
@@ -74,11 +86,14 @@ export default function DashboardEstudiante({ usuario }: Props) {
     }
   }
 
+  // Función para abrir el modal de confirmación de cancelación
   function abrirModal(reservation_number: string) {
     setReservaSeleccionada(reservation_number);
     setModalVisible(true);
   }
 
+
+  // Función para confirmar la cancelación de una reserva
   async function confirmarCancelacion() {
     if (!reservaSeleccionada) return;
     try {
@@ -92,12 +107,15 @@ export default function DashboardEstudiante({ usuario }: Props) {
     }
   }
 
+  // Función para cerrar el modal y limpiar la reserva seleccionada
   function cerrarModal() {
     setModalVisible(false);
     setReservaSeleccionada(null);
   }
 
 
+
+  // Filtrar reservas activas (no canceladas) para mostrar estadísticas
 const reservasCalendario = [...reservasActivas, ...historial].map((r: any) => {
   const fecha = r.date ? r.date.split("T")[0] : "";
   const [anio, mes, dia] = fecha.split("-");
@@ -114,6 +132,7 @@ const reservasCalendario = [...reservasActivas, ...historial].map((r: any) => {
   };
 });
 
+// Filtrar reservas activas (no canceladas) para mostrar estadísticas
   return (
     <div className="space-y-8">
       <ModalConfirmacion

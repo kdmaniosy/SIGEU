@@ -4,6 +4,8 @@ import Features from "@/components/layout/Features";
 import HowItWorks from "@/components/layout/HowItWorks";
 import Footer from "@/components/layout/Footer";
 
+
+// Componente principal de la página de inicio
 export default function Home() {
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">

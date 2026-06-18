@@ -1,7 +1,9 @@
+//importaciones necesarias para el funcionamiento del componente de configuración del usuario en el dashboard.
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+//Definición de la interfaz Usuario para tipar los datos del usuario.
 interface Usuario {
   code: string;
   name1: string;
@@ -13,6 +15,7 @@ interface Usuario {
   usertype_id: string;
 }
 
+//Componente principal de la página de configuración del usuario.
 export default function ConfiguracionPage() {
   const router = useRouter();
   const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -42,6 +45,7 @@ export default function ConfiguracionPage() {
     });
   }, [montado]);
 
+  //Función para manejar la acción de guardar los cambios en el perfil del usuario.
   async function handleGuardar() {
     if (!usuario) return;
     const token = localStorage.getItem("token");
@@ -73,9 +77,11 @@ export default function ConfiguracionPage() {
     }
   }
 
+  //Renderizado condicional para mostrar la interfaz de configuración solo cuando el componente esté montado y el usuario esté cargado.
   if (!montado) return null;
   if (!usuario) return null;
 
+  //Definición de los campos del formulario de configuración con sus respectivas etiquetas y requisitos.
   const campos = [
     { key: "name1",      label: "Primer nombre",    required: true },
     { key: "name2",      label: "Segundo nombre",   required: false },
@@ -84,6 +90,7 @@ export default function ConfiguracionPage() {
     { key: "cellphone",  label: "Celular",          required: false },
   ] as const;
 
+  //Interfaz de usuario para la página de configuración, mostrando los datos actuales del usuario y un formulario para actualizar su información personal.
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-800 mb-2">Configuracion</h1>
@@ -109,7 +116,7 @@ export default function ConfiguracionPage() {
             />
           </div>
         ))}
-
+    
         {mensaje && <p className="text-green-600 text-sm font-medium">{mensaje}</p>}
         {error   && <p className="text-red-600  text-sm font-medium">{error}</p>}
 

@@ -8,18 +8,21 @@ import DashboardAdmin from "@/components/layout/DashboardAdmin";
 
 type Rol = "estudiante" | "docente" | "admin";
 
+// Interfaz para tipar los datos del usuario en sesión
 interface UsuarioSesion {
   code: string;
   name1: string;
   usertype_id: string;
 }
 
+// Mapa para convertir el usertype_id a un rol legible
 const ROL_MAP: Record<string, Rol> = {
   ES: "estudiante",
   DO: "docente",
   AD: "admin",
 };
 
+// Componente principal de la página del dashboard
 export default function DashboardPage() {
   const router = useRouter();
   const [usuario, setUsuario] = useState<UsuarioSesion | null>(null);

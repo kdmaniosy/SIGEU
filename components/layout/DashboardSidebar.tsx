@@ -4,33 +4,46 @@ import { useRouter, usePathname } from "next/navigation";
 
 type Rol = "estudiante" | "docente" | "admin";
 
+
+// Interfaz para las props del componente
 interface Props {
   rol: Rol;
   usuario: { code: string; name1: string; usertype_id: string };
 }
 
+
+// Mapeo para mostrar el rol del usuario con etiquetas legibles
 const ROL_LABEL: Record<Rol, string> = {
   estudiante: "Estudiante",
   docente: "Docente",
   admin: "Administrador",
 };
 
+
+// Colores para cada rol de usuario
 const ROL_COLOR: Record<Rol, string> = {
   estudiante: "bg-blue-100 text-blue-700",
   docente: "bg-green-100 text-green-700",
   admin: "bg-purple-100 text-purple-700",
 };
 
+
+
+// Componente principal del sidebar del dashboard
 export default function DashboardSidebar({ rol, usuario }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
+
+  // Función para cerrar sesión: limpia el token y redirige al login
   function handleCerrarSesion() {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
     router.push("/login");
   }
 
+
+  // Definir los elementos del menú según el rol del usuario
   const menuItems = [
     { icon: "🏠", label: "Inicio",            href: "/dashboard" },
     { icon: "📅", label: "Mis reservas",      href: "/dashboard/mis-reservas" },
@@ -42,6 +55,7 @@ export default function DashboardSidebar({ rol, usuario }: Props) {
     { icon: "⚙️", label: "Configuración",    href: "/dashboard/configuracion" },
   ];
 
+  // Renderizar el sidebar con la información del usuario y el menú de navegación
   return (
     <aside className="w-64 min-h-screen bg-red-700 text-white flex flex-col">
       <div className="p-6 border-b border-red-600">

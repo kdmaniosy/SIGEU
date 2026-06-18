@@ -4,18 +4,23 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { usuariosService } from "@/lib/api";
 
+// Mapeo de roles para mostrar etiquetas legibles y colores asociados
 const ROL_LABEL: Record<string, string> = {
   ES: "Estudiante",
   DO: "Docente",
   AD: "Administrador",
 };
 
+
+// Colores para cada rol en las etiquetas
 const ROL_COLOR: Record<string, string> = {
   ES: "bg-blue-100 text-blue-700",
   DO: "bg-green-100 text-green-700",
   AD: "bg-purple-100 text-purple-700",
 };
 
+
+// Componente principal de la página de gestión de usuarios
 export default function UsuariosPage() {
   const router = useRouter();
   const [usuarios, setUsuarios] = useState<any[]>([]);
@@ -26,6 +31,7 @@ export default function UsuariosPage() {
   const [pagina, setPagina] = useState(0);
   const POR_PAGINA = 15;
 
+  // Efecto para verificar autenticación y cargar usuarios al montar el componente
   useEffect(() => {
     const token = localStorage.getItem("token");
     const data = localStorage.getItem("usuario");
@@ -35,6 +41,8 @@ export default function UsuariosPage() {
     cargarUsuarios();
   }, [router]);
 
+
+  // Efecto para aplicar filtros de búsqueda y rol cada vez que cambian los criterios o la lista de usuarios
   useEffect(() => {
     let resultado = usuarios;
     if (busqueda) {
@@ -46,6 +54,7 @@ export default function UsuariosPage() {
         u.code?.toLowerCase().includes(b)
       );
     }
+    // Si se ha seleccionado un filtro de rol, se aplica al resultado
     if (filtroRol) {
       resultado = resultado.filter((u: any) => u.usertype_id === filtroRol);
     }
@@ -53,6 +62,7 @@ export default function UsuariosPage() {
     setPagina(0);
   }, [busqueda, filtroRol, usuarios]);
 
+  // Función para cargar la lista de usuarios desde el servicio API y manejar estados de carga y error
   async function cargarUsuarios() {
     setCargando(true);
     try {
@@ -67,9 +77,11 @@ export default function UsuariosPage() {
     }
   }
 
+  // Cálculo de los usuarios a mostrar en la página actual según la paginación
   const paginados = filtrados.slice(pagina * POR_PAGINA, (pagina + 1) * POR_PAGINA);
   const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA);
 
+  // Renderizado de la interfaz de gestión de usuarios con filtros, tabla y paginación
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="w-full bg-red-700 text-white px-6 py-4 flex items-center justify-between shadow-md">
@@ -123,7 +135,6 @@ export default function UsuariosPage() {
             </button>
           </div>
         </div>
-
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           {cargando ? (
             <div className="space-y-3 p-6">
@@ -176,7 +187,7 @@ export default function UsuariosPage() {
               </tbody>
             </table>
           )}
-
+  
           {totalPaginas > 1 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
               <p className="text-xs text-gray-500">

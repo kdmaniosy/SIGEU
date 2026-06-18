@@ -1,3 +1,5 @@
+// Componente para mostrar cómo funciona SIGEU en la página de inicio
+
 const steps = [
   {
     number: "01",
@@ -16,6 +18,8 @@ const steps = [
   },
 ];
 
+
+// Componente principal para mostrar cómo funciona SIGEU en la página de inicio
 export default function HowItWorks() {
   return (
     <section id="how" className="py-20 px-6 bg-white">
