@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SIGEU - Sistema de Gestión de Espacios Universitarios
 
-## Getting Started
+Plataforma web para la reserva de aulas, laboratorios y auditorios de la Universidad Francisco de Paula Santander Ocaña.
 
-First, run the development server:
+## Tecnologías
+
+- **Frontend:** Next.js 14, TypeScript, Tailwind CSS
+- **Backend:** FastAPI, Python, SQLAlchemy
+- **Base de datos:** PostgreSQL (Supabase)
+- **IA:** YOLOv8 nano (Ultralytics) + OpenCV
+- **Emails:** fastapi-mail + Gmail SMTP
+
+## Funcionalidades
+
+- Registro e inicio de sesión con roles (Estudiante, Docente, Administrador)
+- Reserva de espacios con validación de disponibilidad y horarios
+- Panel de administración con gestión de reservas y usuarios
+- Control de aforo en tiempo real con detección de personas (YOLO)
+- Streaming de video desde cámara al dashboard del administrador
+- Notificaciones por email (confirmación, cancelación, recuperación de contraseña)
+- Modo oscuro/claro
+- Accesibilidad ARIA
+
+## Requisitos previos
+
+- Node.js 18+
+- Python 3.12+
+- PostgreSQL (Supabase)
+- Cámara web (para el módulo de aforo)
+
+## Instalación
+
+### Frontend
 
 ```bash
+git clone https://github.com/kdmaniosy/SIGEU.git
+cd SIGEU
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Backend
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+git clone https://github.com/kdmaniosy/sigeu-backend.git
+cd sigeu-backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Variables de entorno
 
-## Learn More
+### Backend — archivo `.env`
 
-To learn more about Next.js, take a look at the following resources:
+```env
+DATABASE_URL=postgresql://...
+SECRET_KEY=tu_clave_secreta
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+MAIL_USERNAME=tucorreo@gmail.com
+MAIL_PASSWORD=xxxxxxxxxxxx
+MAIL_FROM=tucorreo@gmail.com
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Frontend — archivo `.env.local`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-## Deploy on Vercel
+## Uso
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Inicia el backend: `uvicorn app.main:app --reload`
+2. Inicia el frontend: `npm run dev`
+3. Abre `http://localhost:3000`
+4. Para el módulo de aforo: `python aforo_detector.py`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Estructura del proyecto
